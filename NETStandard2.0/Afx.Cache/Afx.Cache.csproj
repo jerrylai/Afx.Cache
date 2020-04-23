@@ -1,0 +1,87 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Version>9.0.0</Version>
+    <Description>Afx.Cache for .NET Standard 2.0</Description>
+    <Company>mycsv.cn</Company>
+    <Copyright>Copyright © mycsv 2018</Copyright>
+    <PackageReleaseNotes>Afx.Cache for .NET Standard 2.0</PackageReleaseNotes>
+    <Authors>jerrylai@aliyun.com</Authors>
+    <Product>Afx.Cache for .NET Standard 2.0</Product>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\..\publish\</OutputPath>
+    <DocumentationFile>..\..\publish\netstandard2.0\Afx.Cache.xml</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>bin\Debug\</OutputPath>
+    <DocumentationFile>
+    </DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\Afx.Cache\Impl\BaseCache.cs" Link="Imp\BaseCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Base\GeoCache.cs" Link="Imp\Base\GeoCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Base\HashCache.cs" Link="Imp\Base\HashCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Base\LinkListCache.cs" Link="Imp\Base\LinkListCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Base\RedisCache.cs" Link="Imp\Base\RedisCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Base\SetCache.cs" Link="Imp\Base\SetCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Base\SortSetCache.cs" Link="Imp\Base\SortSetCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Base\StringCache.cs" Link="Imp\Base\StringCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\CacheKey.cs" Link="Imp\CacheKey.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Db\DataDbCache.cs" Link="Imp\Db\DataDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Db\DistributedLockDbCache.cs" Link="Imp\Db\DistributedLockDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Db\GeoDbCache.cs" Link="Imp\Db\GeoDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Db\HashDbCache.cs" Link="Imp\Db\HashDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Db\LinkListDbCache.cs" Link="Imp\Db\LinkListDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Db\ParamDbCache.cs" Link="Imp\Db\ParamDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Db\SessionDbCache.cs" Link="Imp\Db\SessionDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Db\SetDbCache.cs" Link="Imp\Db\SetDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Impl\Db\SortSetDbCache.cs" Link="Imp\Db\SortSetDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Base\IGeoCache.cs" Link="Interfaces\Base\IGeoCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Base\IHashCache.cs" Link="Interfaces\Base\IHashCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Base\ILinkListCache.cs" Link="Interfaces\Base\ILinkListCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Base\IRedisCache.cs" Link="Interfaces\Base\IRedisCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Base\ISetCache.cs" Link="Interfaces\Base\ISetCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Base\ISortSetCache.cs" Link="Interfaces\Base\ISortSetCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Base\IStringCache.cs" Link="Interfaces\Base\IStringCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Db\IDataDbCache.cs" Link="Interfaces\Db\IDataDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Db\IDistributedLockDbCache.cs" Link="Interfaces\Db\IDistributedLockDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Db\IGeoDbCache.cs" Link="Interfaces\Db\IGeoDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Db\IHashDbCache.cs" Link="Interfaces\Db\IHashDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Db\ILinkListDbCache.cs" Link="Interfaces\Db\ILinkListDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Db\IParamDbCache.cs" Link="Interfaces\Db\IParamDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Db\ISessionDbCache.cs" Link="Interfaces\Db\ISessionDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Db\ISetDbCache.cs" Link="Interfaces\Db\ISetDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\Db\ISortSetDbCache.cs" Link="Interfaces\Db\ISortSetDbCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\IBaseCache.cs" Link="Interfaces\IBaseCache.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Interfaces\ICacheKey.cs" Link="Interfaces\ICacheKey.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\CacheKeyModel.cs" Link="Model\CacheKeyModel.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\DistUnit.cs" Link="Model\DistUnit.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\ExcludeType.cs" Link="Model\ExcludeType.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\GeoInfo.cs" Link="Model\GeoInfo.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\GeoPos.cs" Link="Model\GeoPos.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\GeoRadius.cs" Link="Model\GeoRadius.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\OpWhen.cs" Link="Model\OpWhen.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\RadiusOptions.cs" Link="Model\RadiusOptions.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\SetOp.cs" Link="Model\SetOp.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\Sort.cs" Link="Model\Sort.cs" />
+    <Compile Include="..\..\src\Afx.Cache\Model\SortSetModel.cs" Link="Model\SortSetModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\Afx.Cache\CacheKey.xml" Link="CacheKey.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.1.30" />
+    <PackageReference Include="System.Text.Json" Version="4.7.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Imp\Base\" />
+    <Folder Include="Imp\Db\" />
+    <Folder Include="Interfaces\Base\" />
+    <Folder Include="Interfaces\Db\" />
+    <Folder Include="Model\" />
+  </ItemGroup>
+</Project>

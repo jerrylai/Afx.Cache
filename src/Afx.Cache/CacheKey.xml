@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<xml>
+    <!-- db: redis db, expire： 过期时间 天：时：分：秒 -->
+    <!-- 常规数据 db -->
+    <DataDb>
+        
+    </DataDb>
+    <!-- 常规参数数据 db -->
+    <ParamDb>
+        <SysConfig key="sys_config" />
+    </ParamDb>
+    <!-- session Db -->
+    <SessionDb>
+        <UserToken key="user_token" expire="1:0:0" />
+        <UserCurrentToken key="user_current_token" />
+    </SessionDb>
+    <!-- 分布式锁 lock Db -->
+    <DistributedLockDb expire="5:0">
+        <DistributedLock key="distributed_lock" />
+    </DistributedLockDb>
+    <!-- 集合 db -->
+    <SetDb>
+
+    </SetDb>
+    <!-- 有序集合 db -->
+    <SortSetDb>
+
+    </SortSetDb>
+    <!-- Hash db -->
+    <HashDb>
+
+    </HashDb>
+    <!-- 链表 db -->
+    <LinkListDb>
+
+    </LinkListDb>
+    <!-- gps坐标 db -->
+    <GeoDb>
+        
+    </GeoDb>
+</xml>
