@@ -29,7 +29,7 @@ namespace Afx.Cache.Impl.Base
             DictionaryKeyPolicy = null
         };
 #else
-        private static readonly JsonSerializerSettings jsonSerializerOptions = new JsonSerializerSettings()
+        private static readonly JsonSerializerSettings jsonOptions = new JsonSerializerSettings()
         {
             NullValueHandling = NullValueHandling.Ignore,
             MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore
