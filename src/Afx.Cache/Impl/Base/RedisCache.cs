@@ -19,15 +19,20 @@ namespace Afx.Cache.Impl.Base
     public abstract class RedisCache : BaseCache, IRedisCache
     {
 #if NETCOREAPP || NETSTANDARD
-        private static readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions()
+        private static readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions()
         {
             IgnoreNullValues = true,
-            WriteIndented = true
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All),
+            PropertyNameCaseInsensitive = false,
+            PropertyNamingPolicy = null,
+            DictionaryKeyPolicy = null
         };
 #else
         private static readonly JsonSerializerSettings jsonSerializerOptions = new JsonSerializerSettings()
         {
-            NullValueHandling = NullValueHandling.Ignore
+            NullValueHandling = NullValueHandling.Ignore,
+            MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore
         };
 #endif
 
@@ -50,9 +55,9 @@ namespace Afx.Cache.Impl.Base
         {
             if (value == null) return null;
 #if NETCOREAPP || NETSTANDARD
-            return JsonSerializer.Serialize(value, jsonSerializerOptions);
+            return JsonSerializer.Serialize(value, jsonOptions);
 #else
-            return JsonConvert.SerializeObject(value, jsonSerializerOptions);
+            return JsonConvert.SerializeObject(value, jsonOptions);
 #endif
         }
 
@@ -66,9 +71,9 @@ namespace Afx.Cache.Impl.Base
             if (string.IsNullOrEmpty(json)) return default(T);
 
 #if NETCOREAPP || NETSTANDARD
-            return JsonSerializer.Deserialize<T>(json, jsonSerializerOptions);
+            return JsonSerializer.Deserialize<T>(json, jsonOptions);
 #else
-            return JsonConvert.DeserializeObject<T>(json, jsonSerializerOptions);
+            return JsonConvert.DeserializeObject<T>(json, jsonOptions);
 #endif
         }
         /// <summary>
