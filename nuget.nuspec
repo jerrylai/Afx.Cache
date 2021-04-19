@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Afx.Cache</id>
-    <version>10.3.0</version>
+    <version>10.3.1</version>
     <authors>jerrylai</authors>
     <owners>jerrylai</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -41,7 +41,7 @@
         <dependency id="StackExchange.Redis" version="2.1.30" />
       </group>
       <group targetFramework=".NETStandard2.0">
-        <dependency id="System.Text.Json" version="5.0.1" />
+        <dependency id="System.Text.Json" version="4.7.2" />
         <dependency id="StackExchange.Redis" version="2.2.4" />
       </group>
     </dependencies>
