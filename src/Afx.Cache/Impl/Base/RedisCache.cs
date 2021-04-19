@@ -140,17 +140,17 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 缓存key配置
         /// </summary>
-        public virtual CacheKeyModel KeyConfig { get; private set; }
+        public CacheKeyModel KeyConfig { get; private set; }
 
         /// <summary>
         /// 缓存前缀
         /// </summary>
-        public virtual string Prefix { get; private set; }
+        public string Prefix { get; private set; }
 
         /// <summary>
         /// NodeName
         /// </summary>
-        protected virtual string NodeName { get; private set; }
+        protected string NodeName { get; private set; }
 
         /// <summary>
         /// 
