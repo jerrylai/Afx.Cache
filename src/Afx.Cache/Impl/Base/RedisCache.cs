@@ -2,14 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-#if NETCOREAPP || NETSTANDARD
-using System.Text.Json;
-#else
-using Newtonsoft.Json;
-#endif
 using StackExchange.Redis;
 using Afx.Cache.Interfaces;
+using Afx.Cache.Json;
 
 namespace Afx.Cache.Impl.Base
 {
@@ -18,24 +13,6 @@ namespace Afx.Cache.Impl.Base
     /// </summary>
     public abstract class RedisCache : BaseCache, IRedisCache
     {
-#if NETCOREAPP || NETSTANDARD
-        private static readonly JsonSerializerOptions jsonOptions = new JsonSerializerOptions()
-        {
-            IgnoreNullValues = true,
-            WriteIndented = true,
-            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All),
-            PropertyNameCaseInsensitive = false,
-            PropertyNamingPolicy = null,
-            DictionaryKeyPolicy = null
-        };
-#else
-        private static readonly JsonSerializerSettings jsonOptions = new JsonSerializerSettings()
-        {
-            NullValueHandling = NullValueHandling.Ignore,
-            MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore
-        };
-#endif
-
         /// <summary>
         /// ICacheKey
         /// </summary>
@@ -45,37 +22,6 @@ namespace Afx.Cache.Impl.Base
         /// IConnectionMultiplexer
         /// </summary>
         protected IConnectionMultiplexer redis { get; private set; }
-
-        /// <summary>
-        /// 序列化json
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        protected virtual string Serialize<T>(T value)
-        {
-            if (value == null) return null;
-#if NETCOREAPP || NETSTANDARD
-            return JsonSerializer.Serialize(value, jsonOptions);
-#else
-            return JsonConvert.SerializeObject(value, jsonOptions);
-#endif
-        }
-
-        /// <summary>
-        /// 反序列化
-        /// </summary>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        protected virtual T Deserialize<T>(string json)
-        {
-            if (string.IsNullOrEmpty(json)) return default(T);
-
-#if NETCOREAPP || NETSTANDARD
-            return JsonSerializer.Deserialize<T>(json, jsonOptions);
-#else
-            return JsonConvert.DeserializeObject<T>(json, jsonOptions);
-#endif
-        }
         /// <summary>
         /// ToBytes
         /// </summary>
@@ -98,7 +44,7 @@ namespace Afx.Cache.Impl.Base
                 }
                 else
                 {
-                    string json = this.Serialize(value);
+                    string json = JsonUtils.Serialize(value);
                     buffer = Encoding.UTF8.GetBytes(json);
                 }
             }
@@ -129,7 +75,7 @@ namespace Afx.Cache.Impl.Base
                     }
                     else if (!string.IsNullOrEmpty(s))
                     {
-                        m = this.Deserialize<T>(s);
+                        m = JsonUtils.Deserialize<T>(s);
                     }
                 }
             }

@@ -188,6 +188,9 @@
     <Compile Include="..\..\src\Afx.Cache\Interfaces\ICacheKey.cs">
       <Link>Interfaces\ICacheKey.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Afx.Cache\JsonUtils.cs">
+      <Link>JsonUtils.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\Afx.Cache\Model\CacheKeyModel.cs">
       <Link>Model\CacheKeyModel.cs</Link>
     </Compile>
