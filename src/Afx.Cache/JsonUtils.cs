@@ -160,6 +160,8 @@ namespace Afx.Cache.Json
                 case JsonTokenType.False:
                     v = reader.GetBoolean().ToString().ToLower();
                     break;
+                case JsonTokenType.Null:
+                    break;
                 default:
                     throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
@@ -199,6 +201,11 @@ namespace Afx.Cache.Json
                 case JsonTokenType.True:
                     v = true;
                     break;
+                case JsonTokenType.False:
+                    v = false;
+                    break;
+                case JsonTokenType.Null:
+                    break;
                 default:
                     throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
@@ -230,6 +237,11 @@ namespace Afx.Cache.Json
                     break;
                 case JsonTokenType.True:
                     v = 1;
+                    break;
+                case JsonTokenType.False:
+                    v = 0;
+                    break;
+                case JsonTokenType.Null:
                     break;
                 default:
                     throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
@@ -263,6 +275,11 @@ namespace Afx.Cache.Json
                 case JsonTokenType.True:
                     v = 1;
                     break;
+                case JsonTokenType.False:
+                    v = 0;
+                    break;
+                case JsonTokenType.Null:
+                    break;
                 default:
                     throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
@@ -293,6 +310,11 @@ namespace Afx.Cache.Json
                     break;
                 case JsonTokenType.True:
                     v = 1;
+                    break;
+                case JsonTokenType.False:
+                    v = 0;
+                    break;
+                case JsonTokenType.Null:
                     break;
                 default:
                     throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
@@ -326,6 +348,11 @@ namespace Afx.Cache.Json
                 case JsonTokenType.True:
                     v = 1;
                     break;
+                case JsonTokenType.False:
+                    v = 0;
+                    break;
+                case JsonTokenType.Null:
+                    break;
                 default:
                     throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
@@ -357,6 +384,11 @@ namespace Afx.Cache.Json
                     break;
                 case JsonTokenType.True:
                     v = 1;
+                    break;
+                case JsonTokenType.False:
+                    v = 0;
+                    break;
+                case JsonTokenType.Null:
                     break;
                 default:
                     throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
