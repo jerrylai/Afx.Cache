@@ -29,10 +29,12 @@ namespace Afx.Cache.Json
             DictionaryKeyPolicy = null
         };
 
+        public const string DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
         static JsonUtils()
         {
+          //  options.Converters.Add(new DateTimeJsonConverter(DATE_FORMAT));
             options.Converters.Add(new StringJsonConverter());
-            options.Converters.Add(new BooleanJsonConverter());
+            options.Converters.Add(new BoolJsonConverter());
             options.Converters.Add(new IntJsonConverter());
             options.Converters.Add(new LongJsonConverter());
             options.Converters.Add(new FloatJsonConverter());
@@ -142,20 +144,27 @@ namespace Afx.Cache.Json
         /// <returns></returns>
         public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType == JsonTokenType.Number)
+            string v = null;
+            switch (reader.TokenType)
             {
-                if (reader.TryGetInt32(out var num))
-                    return num.ToString();
-                else if (reader.TryGetDecimal(out var dm))
-                    return dm.ToString();
-            }
-            else if (reader.TokenType == JsonTokenType.False || reader.TokenType == JsonTokenType.True)
-            {
-                return reader.GetBoolean().ToString().ToLower();
+                case JsonTokenType.String:
+                    v = reader.GetString();
+                    break;
+                case JsonTokenType.Number:
+                    if (reader.TryGetInt32(out var num))
+                        v = num.ToString();
+                    else if (reader.TryGetDecimal(out var dm))
+                        v = dm.ToString();
+                    break;
+                case JsonTokenType.True:
+                case JsonTokenType.False:
+                    v = reader.GetBoolean().ToString().ToLower();
+                    break;
+                default:
+                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
 
-
-            return reader.GetString();
+            return v;
         }
         /// <summary>
         /// 
@@ -171,40 +180,32 @@ namespace Afx.Cache.Json
     /// <summary>
     /// 
     /// </summary>
-    internal class BooleanJsonConverter : JsonConverter<bool>
+    internal class BoolJsonConverter : JsonConverter<bool>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
+
         public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType == JsonTokenType.Number)
+            bool v = false;
+            switch (reader.TokenType)
             {
-                if (bool.TryParse(reader.GetInt32().ToString(), out var v))
-                    return v;
-            }
-            else if (reader.TokenType == JsonTokenType.String)
-            {
-                var s = reader.GetString();
-                if (s == "on") return true;
-                else if (s == "off") return false;
-                else if (bool.TryParse(s, out var v))
-                    return v;
-                else return false;
+                case JsonTokenType.String:
+                    var s = reader.GetString()?.ToLower();
+                    if (int.TryParse(s, out var k)) v = k != 0;
+                    else v = (s == "true" || s == "on");
+                    break;
+                case JsonTokenType.Number:
+                    if (reader.TryGetInt32(out var j)) v = j != 0;
+                    break;
+                case JsonTokenType.True:
+                    v = true;
+                    break;
+                default:
+                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
 
-            return reader.GetBoolean();
+            return v;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value"></param>
-        /// <param name="options"></param>
+
         public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
         {
             writer.WriteBooleanValue(value);
@@ -215,30 +216,28 @@ namespace Afx.Cache.Json
     /// </summary>
     internal class IntJsonConverter : JsonConverter<int>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
+
         public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType == JsonTokenType.String)
+            int v = 0;
+            switch (reader.TokenType)
             {
-                int v = 0;
-                if (int.TryParse(reader.GetString(), out v))
-                    return v;
+                case JsonTokenType.String:
+                    int.TryParse(reader.GetString(), out v);
+                    break;
+                case JsonTokenType.Number:
+                    reader.TryGetInt32(out v);
+                    break;
+                case JsonTokenType.True:
+                    v = 1;
+                    break;
+                default:
+                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
 
-            return reader.GetInt32();
+            return v;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value"></param>
-        /// <param name="options"></param>
+
         public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
@@ -249,30 +248,28 @@ namespace Afx.Cache.Json
     /// </summary>
     internal class LongJsonConverter : JsonConverter<long>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
+
         public override long Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType == JsonTokenType.String)
+            long v = 0;
+            switch (reader.TokenType)
             {
-                long v = 0;
-                if (long.TryParse(reader.GetString(), out v))
-                    return v;
+                case JsonTokenType.String:
+                    long.TryParse(reader.GetString(), out v);
+                    break;
+                case JsonTokenType.Number:
+                    reader.TryGetInt64(out v);
+                    break;
+                case JsonTokenType.True:
+                    v = 1;
+                    break;
+                default:
+                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
 
-            return reader.GetInt64();
+            return v;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value"></param>
-        /// <param name="options"></param>
+
         public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
@@ -283,30 +280,27 @@ namespace Afx.Cache.Json
     /// </summary>
     internal class FloatJsonConverter : JsonConverter<float>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
         public override float Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType == JsonTokenType.String)
+            float v = 0;
+            switch (reader.TokenType)
             {
-                float v = 0;
-                if (float.TryParse(reader.GetString(), out v))
-                    return v;
+                case JsonTokenType.String:
+                    float.TryParse(reader.GetString(), out v);
+                    break;
+                case JsonTokenType.Number:
+                    reader.TryGetSingle(out v);
+                    break;
+                case JsonTokenType.True:
+                    v = 1;
+                    break;
+                default:
+                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
 
-            return reader.GetSingle();
+            return v;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value"></param>
-        /// <param name="options"></param>
+
         public override void Write(Utf8JsonWriter writer, float value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
@@ -317,30 +311,28 @@ namespace Afx.Cache.Json
     /// </summary>
     internal class DoubleJsonConverter : JsonConverter<double>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
+
         public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType == JsonTokenType.String)
+            double v = 0;
+            switch (reader.TokenType)
             {
-                double v = 0;
-                if (double.TryParse(reader.GetString(), out v))
-                    return v;
+                case JsonTokenType.String:
+                    double.TryParse(reader.GetString(), out v);
+                    break;
+                case JsonTokenType.Number:
+                    reader.TryGetDouble(out v);
+                    break;
+                case JsonTokenType.True:
+                    v = 1;
+                    break;
+                default:
+                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
 
-            return reader.GetDouble();
+            return v;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value"></param>
-        /// <param name="options"></param>
+
         public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
@@ -351,30 +343,28 @@ namespace Afx.Cache.Json
     /// </summary>
     internal class DecimalJsonConverter : JsonConverter<decimal>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
+
         public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if (reader.TokenType == JsonTokenType.String)
+            decimal v = 0;
+            switch (reader.TokenType)
             {
-                decimal v = 0;
-                if (decimal.TryParse(reader.GetString(), out v))
-                    return v;
+                case JsonTokenType.String:
+                    decimal.TryParse(reader.GetString(), out v);
+                    break;
+                case JsonTokenType.Number:
+                    reader.TryGetDecimal(out v);
+                    break;
+                case JsonTokenType.True:
+                    v = 1;
+                    break;
+                default:
+                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
             }
 
-            return reader.GetDecimal();
+            return v;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value"></param>
-        /// <param name="options"></param>
+
         public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options)
         {
             writer.WriteNumberValue(value);
