@@ -12,7 +12,7 @@ namespace Afx.Cache.Impl
     /// </summary>
     public class CacheKey : ICacheKey
     {
-        private List<CacheKeyModel> list;
+        private List<CacheKeyConfig> list;
 
         /// <summary>
         /// 初始化
@@ -38,7 +38,7 @@ namespace Afx.Cache.Impl
 
                     var rootElement = xmlDoc.DocumentElement;
                     if (rootElement == null) throw new ArgumentException(xmlFile + " is error!");
-                    this.list = new List<CacheKeyModel>();
+                    this.list = new List<CacheKeyConfig>();
                     foreach (XmlNode n in rootElement.ChildNodes)
                     {
                         if (n is XmlElement)
@@ -80,7 +80,7 @@ namespace Afx.Cache.Impl
                                             expire = ts;
                                     }
                                     
-                                    this.list.Add(new CacheKeyModel(node.Name, el.Name, key, expire, db));
+                                    this.list.Add(new CacheKeyConfig(node.Name, el.Name, key, expire, db));
                                 }
                             }
                         }
@@ -140,7 +140,7 @@ namespace Afx.Cache.Impl
         /// <param name="node"></param>
         /// <param name="item"></param>
         /// <returns></returns>
-        public CacheKeyModel Get(string node, string item)
+        public CacheKeyConfig Get(string node, string item)
         {
             var m = this.list.Find(q => q.Node == node && q.Item == item);
 

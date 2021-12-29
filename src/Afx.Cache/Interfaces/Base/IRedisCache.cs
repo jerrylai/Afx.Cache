@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+#if NETCOREAPP || NETSTANDARD
+using System.Text.Json;
+#else
+using Newtonsoft.Json;
+#endif
 
 namespace Afx.Cache.Interfaces
 {
@@ -12,17 +17,21 @@ namespace Afx.Cache.Interfaces
         /// <summary>
         /// 缓存key配置
         /// </summary>
-        CacheKeyModel KeyConfig { get; }
-
+        CacheKeyConfig KeyConfig { get; }
+#if NETCOREAPP || NETSTANDARD
+        void SetJsonOptions(JsonSerializerOptions options);
+#else
+        void SetJsonOptions(JsonSerializerSettings options);
+#endif
         /// <summary>
-        /// 获取缓存key
+        /// 获取完整缓存key
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         string GetCacheKey(params object[] args);
 
         /// <summary>
-        /// 获取key所在db
+        /// 获取完整key所在db
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
@@ -56,5 +65,10 @@ namespace Afx.Cache.Interfaces
         /// <param name="args"></param>
         /// <returns>缓存key参数</returns>
         bool Expire(params object[] args);
+        /// <summary>
+        /// ping
+        /// </summary>
+        /// <returns></returns>
+        List<TimeSpan> Ping();
     }
 }

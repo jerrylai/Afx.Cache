@@ -9,7 +9,13 @@ namespace Afx.Cache
     /// </summary>
     public class GeoPos
     {
+        /// <summary>
+        /// 经度
+        /// </summary>
         private double longitude;
+        /// <summary>
+        /// 纬度
+        /// </summary>
         private double latitude;
 
         /// <summary>

@@ -30,8 +30,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 添加数据
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="args"></param>
+        /// <param name="value">value</param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual bool Add(T value, params object[] args)
         {
@@ -47,8 +47,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 添加数据
         /// </summary>
-        /// <param name="list"></param>
-        /// <param name="args"></param>
+        /// <param name="list">value list</param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual long Add(List<T> list, params object[] args)
         {
@@ -70,8 +70,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 是否存在集合
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="args"></param>
+        /// <param name="value">value</param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual bool Exist(T value, params object[] args)
         {
@@ -87,7 +87,7 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 获取集合
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual List<T> Get(params object[] args)
         {
@@ -102,7 +102,7 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 集合数量
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual long GetCount(params object[] args)
         {
@@ -114,9 +114,9 @@ namespace Afx.Cache.Impl.Base
             return r;
         }
         /// <summary>
-        /// 随机返回对象
+        /// 随机返回一个对象
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual T GetRandomValue(params object[] args)
         {
@@ -131,8 +131,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 随机返回对象
         /// </summary>
-        /// <param name="count"></param>
-        /// <param name="args"></param>
+        /// <param name="count">数量</param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual List<T> GetRandomValue(int count, params object[] args)
         {
@@ -148,9 +148,9 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 两个集合运算，返回运算结果
         /// </summary>
-        /// <param name="firstArgs">集合1参数</param>
-        /// <param name="secondArgs">集合2参数</param>
-        /// <param name="op"></param>
+        /// <param name="firstArgs">第一个集合缓存key参数</param>
+        /// <param name="secondArgs">第二集合缓存key参数</param>
+        /// <param name="op">操作</param>
         /// <returns></returns>
         public virtual List<T> Join(object[] firstArgs, object[] secondArgs, SetOp op)
         {
@@ -185,10 +185,10 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 两个集合运算，并将运算结果存储到新集合
         /// </summary>
-        /// <param name="addArgs">新集合</param>
-        /// <param name="firstArgs">集合1参数</param>
-        /// <param name="secondArgs">集合2参数</param>
-        /// <param name="op"></param>
+        /// <param name="addArgs">新集合缓存key参数</param>
+        /// <param name="firstArgs">第一个集合缓存key参数</param>
+        /// <param name="secondArgs">第二集集合缓存key参数</param>
+        /// <param name="op">操作</param>
         /// <returns></returns>
         public virtual long JoinAndAdd(object[] addArgs, object[] firstArgs, object[] secondArgs, SetOp op)
         {
@@ -222,8 +222,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 移动一个已存在对象到新集合
         /// </summary>
-        /// <param name="sourceArgs">原来集合参数</param>
-        /// <param name="desArgs">需要移到新集合参数</param>
+        /// <param name="sourceArgs">源集合缓存key参数</param>
+        /// <param name="desArgs">需要移到新集合缓存key参数</param>
         /// <param name="value">移动对象</param>
         /// <returns></returns>
         public virtual bool Move(object[] sourceArgs, object[] desArgs, T value)
@@ -259,7 +259,7 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 返回并移除一个集合对象
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual T Pop(params object[] args)
         {
@@ -274,8 +274,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 返回并移除集合对象
         /// </summary>
-        /// <param name="count"></param>
-        /// <param name="args"></param>
+        /// <param name="count">数量</param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual List<T> Pop(int count, params object[] args)
         {
@@ -291,8 +291,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 移除对象
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="args"></param>
+        /// <param name="value">value</param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual bool Delete(T value, params object[] args)
         {
@@ -308,8 +308,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 移除对象
         /// </summary>
-        /// <param name="list"></param>
-        /// <param name="args"></param>
+        /// <param name="list">value list</param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual long Delete(List<T> list, params object[] args)
         {
@@ -335,9 +335,9 @@ namespace Afx.Cache.Impl.Base
         /// <param name="pattern">搜索表达式</param>
         /// <param name="start">开始位置</param>
         /// <param name="pageSize">游标页大小</param>
-        /// <param name="args"></param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual IEnumerable<T> Scan(T pattern, int start, int pageSize, params object[] args)
+        public virtual IEnumerable<T> Scan(string pattern, int start, int pageSize, params object[] args)
         {
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);

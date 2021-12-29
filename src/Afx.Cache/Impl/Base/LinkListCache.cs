@@ -212,9 +212,9 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 更新
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="value"></param>
-        /// <param name="args"></param>
+        /// <param name="index">位置</param>
+        /// <param name="value">更新后value</param>
+        /// <param name="args">缓存key参数</param>
         public virtual bool Update(long index, T value, params object[] args)
         {
             if (index < 0) throw new ArgumentNullException(nameof(index));
@@ -229,11 +229,11 @@ namespace Afx.Cache.Impl.Base
         }
 
         /// <summary>
-        /// 移除数据，count=0：移除所有匹配数据
+        /// 移除数据
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="count"></param>
-        /// <param name="args"></param>
+        /// <param name="value">要删除的value</param>
+        /// <param name="count">匹配数据个数，0.匹配所有</param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual long Delete(T value, long count = 0, params object[] args)
         {
@@ -251,9 +251,9 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 移除指定区域之外的所有数据
         /// </summary>
-        /// <param name="start"></param>
-        /// <param name="stop"></param>
-        /// <param name="args"></param>
+        /// <param name="start">开始位置</param>
+        /// <param name="stop">结束位置</param>
+        /// <param name="args">缓存key参数</param>
         public virtual void Trim(long start, long stop, params object[] args)
         {
             if (start < 0) throw new ArgumentException(nameof(start));
@@ -266,7 +266,7 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 获取链表长度
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual long GetCount(params object[] args)
         {

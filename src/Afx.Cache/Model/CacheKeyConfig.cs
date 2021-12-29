@@ -7,14 +7,14 @@ namespace Afx.Cache
     /// <summary>
     /// 缓存key配置
     /// </summary>
-    public class CacheKeyModel
+    public class CacheKeyConfig
     {
         /// <summary>
         /// db节点名称
         /// </summary>
         public string Node { get; private set; }
         /// <summary>
-        /// 配置名称
+        /// 配置Item名称
         /// </summary>
         public string Item { get; private set; }
         /// <summary>
@@ -40,7 +40,7 @@ namespace Afx.Cache
         /// <param name="key"></param>
         /// <param name="expire"></param>
         /// <param name="db"></param>
-        public CacheKeyModel(string node, string item, string key, TimeSpan? expire, List<int> db)
+        public CacheKeyConfig(string node, string item, string key, TimeSpan? expire, List<int> db)
         {
             this.Node = node;
             this.Item = item;
@@ -53,9 +53,9 @@ namespace Afx.Cache
         /// 
         /// </summary>
         /// <returns></returns>
-        public CacheKeyModel Copy()
+        public CacheKeyConfig Copy()
         {
-            return new CacheKeyModel(this.Node, this.Item, this.Key, this.Expire, this.Db);
+            return new CacheKeyConfig(this.Node, this.Item, this.Key, this.Expire, this.Db);
         }
     }
 }

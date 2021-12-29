@@ -18,8 +18,8 @@ namespace Afx.Cache.Impl.Base
         /// <param name="node">缓存key配置db节点</param>
         /// <param name="item">缓存key配置项</param>
         /// <param name="redis"></param>
-        /// <param name="cacheKey"></param>
-        /// <param name="prefix"></param>
+        /// <param name="cacheKey">ICacheKey</param>
+        /// <param name="prefix">缓存前缀</param>
         public GeoCache(string node, string item, IConnectionMultiplexer redis, ICacheKey cacheKey, string prefix)
              : base(node, item, redis, cacheKey, prefix)
         {
@@ -27,10 +27,10 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 添加位置
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="longitude"></param>
-        /// <param name="latitude"></param>
-        /// <param name="args"></param>
+        /// <param name="name">位置名称</param>
+        /// <param name="longitude">经度</param>
+        /// <param name="latitude">纬度</param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual bool AddOrUpdate(string name, double longitude, double latitude, params object[] args)
         {
@@ -47,9 +47,9 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 添加位置
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="pos"></param>
-        /// <param name="args"></param>
+        /// <param name="name">位置名称</param>
+        /// <param name="pos">位置</param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual bool AddOrUpdate(string name, GeoPos pos, params object[] args)
         {
@@ -61,8 +61,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 添加位置
         /// </summary>
-        /// <param name="m"></param>
-        /// <param name="args"></param>
+        /// <param name="m">GeoInfo</param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual bool AddOrUpdate(GeoInfo m, params object[] args)
         {
@@ -75,8 +75,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 添加位置
         /// </summary>
-        /// <param name="list"></param>
-        /// <param name="args"></param>
+        /// <param name="list">List GeoInfo</param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual long AddOrUpdate(List<GeoInfo> list, params object[] args)
         {
@@ -101,8 +101,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 获取坐标
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="args"></param>
+        /// <param name="name">位置名称</param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual GeoPos Get(string name, params object[] args)
         {
@@ -126,8 +126,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 获取坐标
         /// </summary>
-        /// <param name="names"></param>
-        /// <param name="args"></param>
+        /// <param name="names">位置名称</param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual List<GeoPos> Get(List<string> names, params object[] args)
         {
@@ -158,7 +158,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="firstName">坐标点名称</param>
         /// <param name="secondName">坐标点名称</param>
         /// <param name="unit">返回距离单位</param>
-        /// <param name="args"></param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual double? GetDist(string firstName, string secondName, DistUnit unit = DistUnit.m, params object[] args)
         {
@@ -174,8 +174,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 获取GeoHash
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="args"></param>
+        /// <param name="name">位置名称</param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual string GetGeoHash(string name, params object[] args)
         {
@@ -191,8 +191,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 获取GeoHash
         /// </summary>
-        /// <param name="names"></param>
-        /// <param name="args"></param>
+        /// <param name="names">位置名称</param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual List<string> GetGeoHash(List<string> names, params object[] args)
         {
@@ -222,7 +222,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="count">返回数量</param>
         /// <param name="sort">排序，asc.由近到远</param>
         /// <param name="option">返回数据选项</param>
-        /// <param name="args"></param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual List<GeoRadius> GetRadius(string name, double radius, DistUnit unit = DistUnit.m, int count = -1,
             Sort sort = Sort.Asc, RadiusOptions option = RadiusOptions.Default, params object[] args)
@@ -249,14 +249,14 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 查询指定坐标半径内的位置
         /// </summary>
-        /// <param name="longitude"></param>
-        /// <param name="latitude"></param>
+        /// <param name="longitude">经度</param>
+        /// <param name="latitude">纬度</param>
         /// <param name="radius">半径</param>
         /// <param name="unit">半径单位</param>
         /// <param name="count">返回数量</param>
         /// <param name="sort">排序，asc.由近到远</param>
         /// <param name="option">返回数据选项</param>
-        /// <param name="args"></param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual List<GeoRadius> GetRadius(double longitude, double latitude, double radius, DistUnit unit = DistUnit.m, int count = -1,
             Sort sort = Sort.Asc, RadiusOptions option = RadiusOptions.Default, params object[] args)
@@ -288,8 +288,8 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 移除位置点
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="args"></param>
+        /// <param name="name">位置名称</param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual bool Delete(string name, params object[] args)
         {
@@ -305,7 +305,7 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 查询数量
         /// </summary>
-        /// <param name="args"></param>
+        /// <param name="args">key 参数</param>
         /// <returns></returns>
         public virtual long GetCount(params object[] args)
         {

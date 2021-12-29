@@ -14,7 +14,7 @@ namespace Afx.Cache
         /// <param name="node"></param>
         /// <param name="item"></param>
         /// <returns></returns>
-        CacheKeyModel Get(string node, string item);
+        CacheKeyConfig Get(string node, string item);
 
         /// <summary>
         /// 获取key
