@@ -154,6 +154,13 @@ namespace Afx.Cache.Impl.Base
         {
             if (value == null) return null;
 #if NETCOREAPP || NETSTANDARD
+            if (value is JsonElement)
+            {
+                object o = value;
+                var el = (JsonElement)o;
+                return el.GetRawText();
+            }
+
             return JsonSerializer.Serialize(value, defaultOptions);
 #else
             return JsonConvert.SerializeObject(value, options);
