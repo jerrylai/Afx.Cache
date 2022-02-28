@@ -6,6 +6,8 @@ using System.Linq;
 using StackExchange.Redis;
 using Afx.Cache.Interfaces;
 using System.Collections;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Afx.Cache.Impl.Base
 {
@@ -37,7 +39,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value">hash value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long Decrement(TField field, long value = 1, params object[] args)
+        public virtual async Task<long> Decrement(TField field, long value = 1, params object[] args)
         {
             if (field == null) throw new ArgumentNullException(nameof(field));
             var t = typeof(TValue);
@@ -49,7 +51,7 @@ namespace Afx.Cache.Impl.Base
             RedisValue rv = this.ToBytes(field);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var v = database.HashDecrement(cachekey, rv, value);
+            var v = await database.HashDecrementAsync(cachekey, rv, value);
 
             return v;
         }
@@ -60,7 +62,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value">hash value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long Increment(TField field, long value = 1, params object[] args)
+        public virtual async Task<long> Increment(TField field, long value = 1, params object[] args)
         {
             if (field == null) throw new ArgumentNullException(nameof(field));
             var t = typeof(TValue);
@@ -72,7 +74,7 @@ namespace Afx.Cache.Impl.Base
             RedisValue rv = this.ToBytes(field);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var v = database.HashIncrement(cachekey, rv, value);
+            var v = await database.HashIncrementAsync(cachekey, rv, value);
 
             return v;
         }
@@ -82,14 +84,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="field">hash key</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Exists(TField field, params object[] args)
+        public virtual async Task<bool> Exists(TField field, params object[] args)
         {
             if (field == null) throw new ArgumentNullException(nameof(field));
             string cachekey = this.GetCacheKey(args);
             RedisValue rv = this.ToBytes(field);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var v = database.HashExists(cachekey, rv);
+            var v = await database.HashExistsAsync(cachekey, rv);
 
             return v;
         }
@@ -98,12 +100,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual Dictionary<TField, TValue> Get(params object[] args)
+        public virtual async Task<Dictionary<TField, TValue>> Get(params object[] args)
         {
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.HashGetAll(cachekey);
+            var rs = await database.HashGetAllAsync(cachekey);
             Dictionary<TField, TValue> dic = rs?.Select(q=> new KeyValuePair<TField, TValue>(this.FromBytes<TField>(q.Name), this.FromBytes<TValue>(q.Value))).ToDictionary(q => q.Key, q => q.Value);
 
             return dic;
@@ -114,14 +116,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="field">hash key</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual TValue GetValue(TField field, params object[] args)
+        public virtual async Task<TValue> GetValue(TField field, params object[] args)
         {
             if (field == null) throw new ArgumentNullException(nameof(field));
             string cachekey = this.GetCacheKey(args);
             RedisValue rv = this.ToBytes(field);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var v = database.HashGet(cachekey, rv);
+            var v = await database.HashGetAsync(cachekey, rv);
             TValue m = this.FromBytes<TValue>(v);
 
             return m;
@@ -132,7 +134,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="keys">hash key</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<TValue> GetValue(List<TField> keys, params object[] args)
+        public virtual async Task<List<TValue>> GetValue(List<TField> keys, params object[] args)
         {
             if (keys == null) throw new ArgumentNullException(nameof(keys));
             if (keys.Count == 0) return new List<TValue>(0);
@@ -146,7 +148,7 @@ namespace Afx.Cache.Impl.Base
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.HashGet(cachekey, rvs);
+            var rs = await database.HashGetAsync(cachekey, rvs);
             List<TValue> list = rs?.Select(q => this.FromBytes<TValue>(q)).ToList();
 
             return list;
@@ -156,12 +158,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long GetCount(params object[] args)
+        public virtual async Task<long> GetCount(params object[] args)
         {
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.HashLength(cachekey);
+            var rs = await database.HashLengthAsync(cachekey);
 
             return rs;
         }
@@ -170,12 +172,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<TField> GeTFields(params object[] args)
+        public virtual async Task<List<TField>> GeTFields(params object[] args)
         {
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.HashKeys(cachekey);
+            var rs = await database.HashKeysAsync(cachekey);
             List<TField> list = rs?.Select(q => this.FromBytes<TField>(q)).ToList();
 
             return list;
@@ -185,12 +187,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<TValue> GetValues(params object[] args)
+        public virtual async Task<List<TValue>> GetValues(params object[] args)
         {
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.HashValues(cachekey);
+            var rs = await database.HashValuesAsync(cachekey);
             List<TValue> list = rs?.Select(q => this.FromBytes<TValue>(q)).ToList();
 
             return list;
@@ -201,14 +203,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="field">hash key</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Delete(TField field, params object[] args)
+        public virtual async Task<bool> Delete(TField field, params object[] args)
         {
             if (field == null) throw new ArgumentNullException(nameof(field));
             string cachekey = this.GetCacheKey(args);
             RedisValue rv = this.ToBytes(field);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.HashDelete(cachekey, rv);
+            var rs = await database.HashDeleteAsync(cachekey, rv);
 
             return rs;
         }
@@ -218,7 +220,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="fields">hash key</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long Delete(List<TField> fields, params object[] args)
+        public virtual async Task<long> Delete(List<TField> fields, params object[] args)
         {
             if (fields == null) throw new ArgumentNullException(nameof(fields));
             if (fields.Count == 0) return 0;
@@ -232,7 +234,7 @@ namespace Afx.Cache.Impl.Base
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.HashDelete(cachekey, rvs);
+            var rs = await database.HashDeleteAsync(cachekey, rvs);
 
             return rs;
         }
@@ -244,7 +246,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="when">操作</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Set(TField field, TValue value, OpWhen when = OpWhen.Always, params object[] args)
+        public virtual async Task<bool> Set(TField field, TValue value, OpWhen when = OpWhen.Always, params object[] args)
         {
             if (field == null) throw new ArgumentNullException(nameof(field));
             string cachekey = this.GetCacheKey(args);
@@ -252,7 +254,7 @@ namespace Afx.Cache.Impl.Base
             RedisValue rv = this.ToBytes(value);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.HashSet(cachekey, rf, rv, (When)(int)when);
+            var rs = await database.HashSetAsync(cachekey, rf, rv, (When)(int)when);
 
             return rs;
         }
@@ -261,7 +263,7 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="dic">Dictionary</param>
         /// <param name="args">缓存key参数</param>
-        public virtual void AddOrUpdate(Dictionary<TField, TValue> dic, params object[] args)
+        public virtual async Task AddOrUpdate(Dictionary<TField, TValue> dic, params object[] args)
         {
             if (dic == null) throw new ArgumentNullException(nameof(dic));
             if (dic.Count == 0) return;
@@ -275,7 +277,7 @@ namespace Afx.Cache.Impl.Base
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            database.HashSet(cachekey, hs);
+            await database.HashSetAsync(cachekey, hs);
         }
 
         /// <summary>
@@ -286,68 +288,66 @@ namespace Afx.Cache.Impl.Base
         /// <param name="pageSize">游标页大小</param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual IEnumerable<KeyValuePair<TField, TValue>> Scan(string pattern, int start, int pageSize, params object[] args)
+        public virtual IAsyncEnumerable<KeyValuePair<TField, TValue>> Scan(string pattern, int start, int pageSize, params object[] args)
         {
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var el = database.HashScan(cachekey, this.ToBytes(pattern), pageSize, 0, start);
+            var el = database.HashScanAsync(cachekey, this.ToBytes(pattern), pageSize, 0, start);
 
-            return new Enumerable(this, el);
+            return new AsyncEnumerable(this, el);
         }
 
-        class Enumerator : IEnumerator<KeyValuePair<TField, TValue>>
+        class AsyncEnumerator : IAsyncEnumerator<KeyValuePair<TField, TValue>>
         {
             private HashCache<TField, TValue> hashCache;
-            private IEnumerator<HashEntry> enumerator;
+            private IAsyncEnumerator<HashEntry> enumerator;
             
-            public Enumerator(HashCache<TField, TValue> hashCache, IEnumerator<HashEntry> enumerator)
+            public AsyncEnumerator(HashCache<TField, TValue> hashCache, IAsyncEnumerator<HashEntry> enumerator)
             {
                 this.hashCache = hashCache;
                 this.enumerator = enumerator;
             }
 
-            public KeyValuePair<TField, TValue> Current => new KeyValuePair<TField, TValue>(this.hashCache.FromBytes<TField>(enumerator.Current.Name), this.hashCache.FromBytes<TValue>(enumerator.Current.Value));
-
-            object IEnumerator.Current => this.Current;
-
-            public void Dispose()
+            public KeyValuePair<TField, TValue> Current
             {
-                if (this.enumerator != null) this.enumerator.Dispose();
+                get
+                {
+                    var name = enumerator.Current.Name;
+                    var v = enumerator.Current.Value;
+
+                    return new KeyValuePair<TField, TValue>(this.hashCache.FromBytes<TField>(name), this.hashCache.FromBytes<TValue>(v));
+                }
+            }
+            
+            public virtual async ValueTask<bool> MoveNextAsync()
+            {
+               return await enumerator.MoveNextAsync();
+            }
+
+            public virtual async ValueTask DisposeAsync()
+            {
+                if (this.enumerator != null) await this.enumerator.DisposeAsync();
                 this.hashCache = null;
                 this.enumerator = null;
             }
 
-            public bool MoveNext()
-            {
-               return this.enumerator.MoveNext();
-            }
-
-            public void Reset()
-            {
-                this.enumerator.Reset();
-            }
         }
 
-        class Enumerable: IEnumerable<KeyValuePair<TField, TValue>>
+        class AsyncEnumerable : IAsyncEnumerable<KeyValuePair<TField, TValue>>
         {
             private HashCache<TField, TValue> hashCache;
-            private IEnumerable<HashEntry> hashes;
+            private IAsyncEnumerable<HashEntry> hashes;
 
-            public Enumerable(HashCache<TField, TValue> hashCache, IEnumerable<HashEntry> hashes)
+            public AsyncEnumerable(HashCache<TField, TValue> hashCache, IAsyncEnumerable<HashEntry> hashes)
             {
                 this.hashCache = hashCache;
                 this.hashes = hashes;
             }
 
-            public IEnumerator<KeyValuePair<TField, TValue>> GetEnumerator()
+            public virtual IAsyncEnumerator<KeyValuePair<TField, TValue>> GetAsyncEnumerator(CancellationToken cancellationToken = default)
             {
-                return new Enumerator(this.hashCache, this.hashes.GetEnumerator());
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
+                return new AsyncEnumerator(this.hashCache, this.hashes.GetAsyncEnumerator(cancellationToken));
             }
         }
     }

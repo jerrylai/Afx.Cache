@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using Afx.Cache.Interfaces;
+using System.Threading.Tasks;
 
 namespace Afx.Cache.Impl.Base
 {
@@ -32,7 +33,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="latitude">纬度</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual bool AddOrUpdate(string name, double longitude, double latitude, params object[] args)
+        public virtual async Task<bool> AddOrUpdate(string name, double longitude, double latitude, params object[] args)
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             if (longitude > 180 || longitude < -180) throw new ArgumentException($"{nameof(longitude)}({longitude}) is error!", nameof(longitude));
@@ -40,7 +41,7 @@ namespace Afx.Cache.Impl.Base
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var r = database.GeoAdd(cachekey, longitude, latitude, name);
+            var r = await database.GeoAddAsync(cachekey, longitude, latitude, name);
 
             return r;
         }
@@ -51,12 +52,12 @@ namespace Afx.Cache.Impl.Base
         /// <param name="pos">位置</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual bool AddOrUpdate(string name, GeoPos pos, params object[] args)
+        public virtual async Task<bool> AddOrUpdate(string name, GeoPos pos, params object[] args)
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             if (pos == null) throw new ArgumentNullException(nameof(pos));
 
-            return this.AddOrUpdate(name, pos.Longitude, pos.Latitude, args);
+            return await this.AddOrUpdate(name, pos.Longitude, pos.Latitude, args);
         }
         /// <summary>
         /// 添加位置
@@ -64,13 +65,13 @@ namespace Afx.Cache.Impl.Base
         /// <param name="m">GeoInfo</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual bool AddOrUpdate(GeoInfo m, params object[] args)
+        public virtual async Task<bool> AddOrUpdate(GeoInfo m, params object[] args)
         {
             if (m == null) throw new ArgumentNullException(nameof(m));
             if (string.IsNullOrEmpty(m.Name)) throw new ArgumentNullException(nameof(m.Name));
             if (m.Position == null) throw new ArgumentNullException(nameof(m.Position));
 
-            return this.AddOrUpdate(m.Name, m.Position.Longitude, m.Position.Latitude, args);
+            return await this.AddOrUpdate(m.Name, m.Position.Longitude, m.Position.Latitude, args);
         }
         /// <summary>
         /// 添加位置
@@ -78,7 +79,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="list">List GeoInfo</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual long AddOrUpdate(List<GeoInfo> list, params object[] args)
+        public virtual async Task<long> AddOrUpdate(List<GeoInfo> list, params object[] args)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
             if (list.Count == 0) return 0;
@@ -94,7 +95,7 @@ namespace Afx.Cache.Impl.Base
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var r = database.GeoAdd(cachekey, geos);
+            var r = await database.GeoAddAsync(cachekey, geos);
 
             return r;
         }
@@ -104,13 +105,13 @@ namespace Afx.Cache.Impl.Base
         /// <param name="name">位置名称</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual GeoPos Get(string name, params object[] args)
+        public virtual async Task<GeoPos> Get(string name, params object[] args)
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var pos = database.GeoPosition(cachekey, name);
+            var pos = await database.GeoPositionAsync(cachekey, name);
             GeoPos m = null;
             if(pos.HasValue)
             {
@@ -129,7 +130,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="names">位置名称</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual List<GeoPos> Get(List<string> names, params object[] args)
+        public virtual async Task<List<GeoPos>> Get(List<string> names, params object[] args)
         {
             if (names == null) throw new ArgumentNullException(nameof(names));
             if (names.Count == 0) return new List<GeoPos>(0);
@@ -143,7 +144,7 @@ namespace Afx.Cache.Impl.Base
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var pos = database.GeoPosition(cachekey, members);
+            var pos = await database.GeoPositionAsync(cachekey, members);
             List<GeoPos> list = pos?.Select(q => !q.HasValue ? null : new GeoPos
             {
                 Latitude = q.Value.Latitude,
@@ -160,14 +161,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="unit">返回距离单位</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual double? GetDist(string firstName, string secondName, DistUnit unit = DistUnit.m, params object[] args)
+        public virtual async Task<double?> GetDist(string firstName, string secondName, DistUnit unit = DistUnit.m, params object[] args)
         {
             if (string.IsNullOrEmpty(firstName)) throw new ArgumentNullException(nameof(firstName));
             if (string.IsNullOrEmpty(secondName)) throw new ArgumentNullException(nameof(secondName));
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var dist = database.GeoDistance(cachekey, firstName, secondName, (GeoUnit)((int)unit));
+            var dist = await database.GeoDistanceAsync(cachekey, firstName, secondName, (GeoUnit)((int)unit));
 
             return dist;
         }
@@ -177,13 +178,13 @@ namespace Afx.Cache.Impl.Base
         /// <param name="name">位置名称</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual string GetGeoHash(string name, params object[] args)
+        public virtual async Task<string> GetGeoHash(string name, params object[] args)
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var hash = database.GeoHash(cachekey, name);
+            var hash = await database.GeoHashAsync(cachekey, name);
 
             return hash;
         }
@@ -194,7 +195,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="names">位置名称</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual List<string> GetGeoHash(List<string> names, params object[] args)
+        public virtual async Task<List<string>> GetGeoHash(List<string> names, params object[] args)
         {
             if (names == null) throw new ArgumentNullException(nameof(names));
             if (names.Count == 0) return new List<string>(0);
@@ -208,7 +209,7 @@ namespace Afx.Cache.Impl.Base
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var hashs = database.GeoHash(cachekey, members);
+            var hashs = await database.GeoHashAsync(cachekey, members);
             List<string> list = hashs?.ToList();
 
             return list;
@@ -224,7 +225,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="option">返回数据选项</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual List<GeoRadius> GetRadius(string name, double radius, DistUnit unit = DistUnit.m, int count = -1,
+        public virtual async Task<List<GeoRadius>> GetRadius(string name, double radius, DistUnit unit = DistUnit.m, int count = -1,
             Sort sort = Sort.Asc, RadiusOptions option = RadiusOptions.Default, params object[] args)
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
@@ -233,7 +234,7 @@ namespace Afx.Cache.Impl.Base
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.GeoRadius(cachekey, name, radius, (GeoUnit)((int)unit), count, (Order)((int)sort), (GeoRadiusOptions)((int)option));
+            var rs = await database.GeoRadiusAsync(cachekey, name, radius, (GeoUnit)((int)unit), count, (Order)((int)sort), (GeoRadiusOptions)((int)option));
             List<GeoRadius> list = rs?.Select(q => new GeoRadius
             {
                 Name = q.Member,
@@ -258,7 +259,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="option">返回数据选项</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual List<GeoRadius> GetRadius(double longitude, double latitude, double radius, DistUnit unit = DistUnit.m, int count = -1,
+        public virtual async Task<List<GeoRadius>> GetRadius(double longitude, double latitude, double radius, DistUnit unit = DistUnit.m, int count = -1,
             Sort sort = Sort.Asc, RadiusOptions option = RadiusOptions.Default, params object[] args)
         {
             if (longitude > 180 || longitude < -180) throw new ArgumentException($"{nameof(longitude)}({longitude}) is error!", nameof(longitude));
@@ -268,7 +269,7 @@ namespace Afx.Cache.Impl.Base
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var rs = database.GeoRadius(cachekey, longitude, latitude, radius, (GeoUnit)((int)unit), count, (Order)((int)sort), (GeoRadiusOptions)((int)option));
+            var rs = await database.GeoRadiusAsync(cachekey, longitude, latitude, radius, (GeoUnit)((int)unit), count, (Order)((int)sort), (GeoRadiusOptions)((int)option));
             List<GeoRadius> list = rs?.Select(q => new GeoRadius
             {
                 Name = q.Member,
@@ -291,13 +292,13 @@ namespace Afx.Cache.Impl.Base
         /// <param name="name">位置名称</param>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual bool Delete(string name, params object[] args)
+        public virtual async Task<bool> Delete(string name, params object[] args)
         {
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var r = database.GeoRemove(cachekey, name);
+            var r = await database.GeoRemoveAsync(cachekey, name);
 
             return r;
         }
@@ -307,12 +308,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">key 参数</param>
         /// <returns></returns>
-        public virtual long GetCount(params object[] args)
+        public virtual async Task<long> GetCount(params object[] args)
         {
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            return database.SortedSetLength(cachekey);
+            return await database.SortedSetLengthAsync(cachekey);
         }
     }
 }

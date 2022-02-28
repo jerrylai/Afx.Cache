@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Afx.Cache.Interfaces
 {
@@ -16,35 +17,35 @@ namespace Afx.Cache.Interfaces
         /// <param name="value">value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long PushLeft(T value, params object[] args);
+        Task<long> PushLeft(T value, params object[] args);
         /// <summary>
         /// 添加到左边第一个
         /// </summary>
         /// <param name="list">value List</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long PushLeft(List<T> list, params object[] args);
+        Task<long> PushLeft(List<T> list, params object[] args);
         /// <summary>
         /// 添加到右边第一个
         /// </summary>
         /// <param name="value">value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long PushRight(T value, params object[] args);
+        Task<long> PushRight(T value, params object[] args);
         /// <summary>
         /// 添加到右边第一个
         /// </summary>
         /// <param name="list">value List</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long PushRight(List<T> list, params object[] args);
+        Task<long> PushRight(List<T> list, params object[] args);
         /// <summary>
         /// 获取指定索引位置数据
         /// </summary>
         /// <param name="index">索引位置</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        T Get(long index, params object[] args);
+        Task<T> Get(long index, params object[] args);
         /// <summary>
         /// 获取一个范围数据
         /// </summary>
@@ -52,7 +53,7 @@ namespace Afx.Cache.Interfaces
         /// <param name="stop">结束位置，-1.全部</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        List<T> GetRange(long start = 0, long stop = -1, params object[] args);
+        Task<List<T>> GetRange(long start = 0, long stop = -1, params object[] args);
         /// <summary>
         /// 那个value后面
         /// </summary>
@@ -60,7 +61,7 @@ namespace Afx.Cache.Interfaces
         /// <param name="value">插入value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long InsertAfter(T pivot, T value, params object[] args);
+        Task<long> InsertAfter(T pivot, T value, params object[] args);
         /// <summary>
         /// 插入到那个value前面
         /// </summary>
@@ -68,19 +69,19 @@ namespace Afx.Cache.Interfaces
         /// <param name="value">插入value<</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long InsertBefore(T pivot, T value, params object[] args);
+        Task<long> InsertBefore(T pivot, T value, params object[] args);
         /// <summary>
         /// 返回并移除左边第一个
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        T PopLeft(params object[] args);
+        Task<T> PopLeft(params object[] args);
         /// <summary>
         /// 返回并移除右边第一个
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        T PopRight(params object[] args);
+        Task<T> PopRight(params object[] args);
 
         /// <summary>
         /// 更新
@@ -88,7 +89,7 @@ namespace Afx.Cache.Interfaces
         /// <param name="index">位置</param>
         /// <param name="value">更新后value</param>
         /// <param name="args">缓存key参数</param>
-        bool Update(long index, T value, params object[] args);
+        Task<bool> Update(long index, T value, params object[] args);
 
         /// <summary>
         /// 移除数据
@@ -97,7 +98,7 @@ namespace Afx.Cache.Interfaces
         /// <param name="count">匹配数据个数，0.匹配所有</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long Delete(T value, long count = 0, params object[] args);
+        Task<long> Delete(T value, long count = 0, params object[] args);
 
         /// <summary>
         /// 移除指定区域之外的所有数据
@@ -105,12 +106,12 @@ namespace Afx.Cache.Interfaces
         /// <param name="start">开始位置</param>
         /// <param name="stop">结束位置</param>
         /// <param name="args">缓存key参数</param>
-        void Trim(long start, long stop, params object[] args);
+        Task Trim(long start, long stop, params object[] args);
         /// <summary>
         /// 获取链表长度
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long GetCount(params object[] args);
+        Task<long> GetCount(params object[] args);
     }
 }

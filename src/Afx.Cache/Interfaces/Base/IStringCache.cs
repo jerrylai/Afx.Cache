@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Afx.Cache.Interfaces
 {
@@ -15,7 +16,7 @@ namespace Afx.Cache.Interfaces
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        T Get(params object[] args);
+        Task<T> Get(params object[] args);
 
         /// <summary>
         /// 添加或更新
@@ -24,7 +25,7 @@ namespace Afx.Cache.Interfaces
         /// <param name="when">when</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        bool Set(T value, OpWhen when = OpWhen.Always, params object[] args);
+        Task<bool> Set(T value, OpWhen when = OpWhen.Always, params object[] args);
 
         /// <summary>
         /// 添加或更新
@@ -34,20 +35,20 @@ namespace Afx.Cache.Interfaces
         /// <param name="when">when</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        bool Set(T m, TimeSpan? expireIn, OpWhen when = OpWhen.Always, params object[] args);
+        Task<bool> Set(T m, TimeSpan? expireIn, OpWhen when = OpWhen.Always, params object[] args);
         /// <summary>
         /// 原子增 T 必须是 int、 long
         /// </summary>
         /// <param name="value">value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long Increment(long value = 1, params object[] args);
+        Task<long> Increment(long value = 1, params object[] args);
         /// <summary>
         /// 原子减 T 必须是 int、 long
         /// </summary>
         /// <param name="value">value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        long Decrement(long value = 1, params object[] args);
+        Task<long> Decrement(long value = 1, params object[] args);
     }
 }

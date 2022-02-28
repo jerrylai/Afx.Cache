@@ -6,6 +6,8 @@ using System.Linq;
 using StackExchange.Redis;
 using Afx.Cache.Interfaces;
 using System.Collections;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Afx.Cache.Impl.Base
 {
@@ -33,14 +35,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value">value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Add(T value, params object[] args)
+        public virtual async Task<bool> Add(T value, params object[] args)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rv = this.ToBytes(value);
-            var r = database.SetAdd(key, rv);
+            var r = await database.SetAddAsync(key, rv);
 
             return r;
         }
@@ -50,7 +52,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="list">value list</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long Add(List<T> list, params object[] args)
+        public virtual async Task<long> Add(List<T> list, params object[] args)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
             if (list.Count == 0) return 0;
@@ -63,7 +65,7 @@ namespace Afx.Cache.Impl.Base
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rvs = list.Select<T, RedisValue>(q => this.ToBytes(q)).ToArray();
-            var r = database.SetAdd(key, rvs);
+            var r = await database.SetAddAsync(key, rvs);
 
             return r;
         }
@@ -73,14 +75,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value">value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Exist(T value, params object[] args)
+        public virtual async Task<bool> Exist(T value, params object[] args)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rv = this.ToBytes(value);
-            var r = database.SetContains(key, rv);
+            var r = await database.SetContainsAsync(key, rv);
 
             return r;
         }
@@ -89,12 +91,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<T> Get(params object[] args)
+        public virtual async Task<List<T>> Get(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SetMembers(key);
+            var rs = await database.SetMembersAsync(key);
             List<T> list = rs?.Select(q => this.FromBytes<T>(q)).ToList();
 
             return list;
@@ -104,12 +106,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long GetCount(params object[] args)
+        public virtual async Task<long> GetCount(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.SetLength(key);
+            var r = await database.SetLengthAsync(key);
 
             return r;
         }
@@ -118,12 +120,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual T GetRandomValue(params object[] args)
+        public virtual async Task<T> GetRandomValue(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.SetRandomMember(key);
+            var r = await database.SetRandomMemberAsync(key);
             var v = this.FromBytes<T>(r);
 
             return v;
@@ -134,13 +136,13 @@ namespace Afx.Cache.Impl.Base
         /// <param name="count">数量</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<T> GetRandomValue(int count, params object[] args)
+        public virtual async Task<List<T>> GetRandomValue(int count, params object[] args)
         {
             if (count <= 0) throw new ArgumentException($"{nameof(count)}({count}) is error!", nameof(count));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SetRandomMembers(key, count);
+            var rs = await database.SetRandomMembersAsync(key, count);
             List<T> list = rs?.Select(q => this.FromBytes<T>(q)).ToList();
 
             return list;
@@ -152,7 +154,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="secondArgs">第二集合缓存key参数</param>
         /// <param name="op">操作</param>
         /// <returns></returns>
-        public virtual List<T> Join(object[] firstArgs, object[] secondArgs, SetOp op)
+        public virtual async Task<List<T>> Join(object[] firstArgs, object[] secondArgs, SetOp op)
         {
             if (firstArgs == secondArgs
                 || firstArgs != null && secondArgs!= null
@@ -177,7 +179,7 @@ namespace Afx.Cache.Impl.Base
             int db = this.GetCacheDb(firstKey);
             var database = this.redis.GetDatabase(db);
             RedisKey[] redisKeys = new RedisKey[2] { firstKey, secondKey };
-            var rs = database.SetCombine((SetOperation)((int)op), redisKeys);
+            var rs = await database.SetCombineAsync((SetOperation)((int)op), redisKeys);
             List<T> list = rs?.Select(q => this.FromBytes<T>(q)).ToList();
 
             return list;
@@ -190,7 +192,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="secondArgs">第二集集合缓存key参数</param>
         /// <param name="op">操作</param>
         /// <returns></returns>
-        public virtual long JoinAndAdd(object[] addArgs, object[] firstArgs, object[] secondArgs, SetOp op)
+        public virtual async Task<long> JoinAndAdd(object[] addArgs, object[] firstArgs, object[] secondArgs, SetOp op)
         {
             if (firstArgs == secondArgs
                 || firstArgs != null && secondArgs != null
@@ -215,7 +217,7 @@ namespace Afx.Cache.Impl.Base
             string secondKey = this.GetCacheKey(secondArgs);
             int db = this.GetCacheDb(firstKey);
             var database = this.redis.GetDatabase(db);
-            var r = database.SetCombineAndStore((SetOperation)((int)op), addKey, firstKey, secondKey);
+            var r = await database.SetCombineAndStoreAsync((SetOperation)((int)op), addKey, firstKey, secondKey);
 
             return r;
         }
@@ -226,7 +228,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="desArgs">需要移到新集合缓存key参数</param>
         /// <param name="value">移动对象</param>
         /// <returns></returns>
-        public virtual bool Move(object[] sourceArgs, object[] desArgs, T value)
+        public virtual async Task<bool> Move(object[] sourceArgs, object[] desArgs, T value)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             if (sourceArgs == desArgs
@@ -252,7 +254,7 @@ namespace Afx.Cache.Impl.Base
             RedisValue v = this.ToBytes<T>(value);
             int db = this.GetCacheDb(sourceKey);
             var database = this.redis.GetDatabase(db);
-            var r = database.SetMove(sourceKey, desKey, v);
+            var r = await database.SetMoveAsync(sourceKey, desKey, v);
 
             return r;
         }
@@ -261,12 +263,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual T Pop(params object[] args)
+        public virtual async Task<T> Pop(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.SetPop(key);
+            var r = await database.SetPopAsync(key);
             var v = this.FromBytes<T>(r);
 
             return v;
@@ -277,13 +279,13 @@ namespace Afx.Cache.Impl.Base
         /// <param name="count">数量</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<T> Pop(int count, params object[] args)
+        public virtual async Task<List<T>> Pop(int count, params object[] args)
         {
             if (count <= 0) throw new ArgumentException($"{nameof(count)}({count}) is error!", nameof(count));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SetPop(key, count);
+            var rs = await database.SetPopAsync(key, count);
             List<T> list = rs?.Select(q => this.FromBytes<T>(q)).ToList();
 
             return list;
@@ -294,14 +296,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value">value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Delete(T value, params object[] args)
+        public virtual async Task<bool> Delete(T value, params object[] args)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             string key = this.GetCacheKey(args);
             RedisValue v = this.ToBytes<T>(value);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.SetRemove(key, v);
+            var r = await database.SetRemoveAsync(key, v);
 
             return r;
         }
@@ -311,7 +313,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="list">value list</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long Delete(List<T> list, params object[] args)
+        public virtual async Task<long> Delete(List<T> list, params object[] args)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
             if (list.Count == 0) return 0;
@@ -324,7 +326,7 @@ namespace Afx.Cache.Impl.Base
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rvs = list.Select<T, RedisValue>(q => this.ToBytes(q)).ToArray();
-            var r = database.SetRemove(key, rvs);
+            var r = await database.SetRemoveAsync(key, rvs);
 
             return r;
         }
@@ -337,22 +339,22 @@ namespace Afx.Cache.Impl.Base
         /// <param name="pageSize">游标页大小</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual IEnumerable<T> Scan(string pattern, int start, int pageSize, params object[] args)
+        public virtual IAsyncEnumerable<T> Scan(string pattern, int start, int pageSize, params object[] args)
         {
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var el = database.SetScan(cachekey, this.ToBytes(pattern), pageSize, 0, start);
+            var el = database.SetScanAsync(cachekey, this.ToBytes(pattern), pageSize, 0, start);
 
-            return new Enumerable(this, el);
+            return new AsyncEnumerable(this, el);
         }
 
-        class Enumerator : IEnumerator<T>
+        class AsyncEnumerator : IAsyncEnumerator<T>
         {
             private SetCache<T> setCache;
-            private IEnumerator<RedisValue> enumerator;
+            private IAsyncEnumerator<RedisValue> enumerator;
 
-            public Enumerator(SetCache<T> setCache, IEnumerator<RedisValue> enumerator)
+            public AsyncEnumerator(SetCache<T> setCache, IAsyncEnumerator<RedisValue> enumerator)
             {
                 this.setCache = setCache;
                 this.enumerator = enumerator;
@@ -360,45 +362,34 @@ namespace Afx.Cache.Impl.Base
 
             public T Current => this.setCache.FromBytes<T>(enumerator.Current);
 
-            object IEnumerator.Current => this.Current;
 
-            public void Dispose()
+            public async ValueTask DisposeAsync()
             {
-                if (this.enumerator != null) this.enumerator.Dispose();
+                if (this.enumerator != null) await this.enumerator.DisposeAsync();
                 this.setCache = null;
                 this.enumerator = null;
             }
 
-            public bool MoveNext()
+            public async ValueTask<bool> MoveNextAsync()
             {
-                return this.enumerator.MoveNext();
-            }
-
-            public void Reset()
-            {
-                this.enumerator.Reset();
+                return await this.enumerator.MoveNextAsync();
             }
         }
 
-        class Enumerable : IEnumerable<T>
+        class AsyncEnumerable : IAsyncEnumerable<T>
         {
             private SetCache<T> setCache;
-            private IEnumerable<RedisValue> values;
+            private IAsyncEnumerable<RedisValue> values;
 
-            public Enumerable(SetCache<T> setCache, IEnumerable<RedisValue> values)
+            public AsyncEnumerable(SetCache<T> setCache, IAsyncEnumerable<RedisValue> values)
             {
                 this.setCache = setCache;
                 this.values = values;
             }
 
-            public IEnumerator<T> GetEnumerator()
+            public IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
             {
-                return new Enumerator(this.setCache, this.values.GetEnumerator());
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
+                return new AsyncEnumerator(this.setCache, this.values.GetAsyncEnumerator(cancellationToken));
             }
         }
     }

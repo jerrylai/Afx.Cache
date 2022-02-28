@@ -5,6 +5,7 @@ using System.Text;
 
 using StackExchange.Redis;
 using Afx.Cache.Interfaces;
+using System.Threading.Tasks;
 
 #if NETCOREAPP || NETSTANDARD
 using System.Text.Encodings.Web;
@@ -295,13 +296,13 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Remove(params object[] args)
+        public virtual async Task<bool> Remove(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
 
-            return database.KeyDelete(key);
+            return await database.KeyDeleteAsync(key);
         }
 
         /// <summary>
@@ -309,13 +310,13 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Contains(params object[] args)
+        public virtual async Task<bool> Contains(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
 
-            return database.KeyExists(key);
+            return await database.KeyExistsAsync(key);
         }
 
         /// <summary>
@@ -323,13 +324,13 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Expire(params object[] args)
+        public virtual async Task<bool> Expire(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
 
-            return database.KeyExpire(key, this.KeyConfig.Expire);
+            return await database.KeyExpireAsync(key, this.KeyConfig.Expire);
         }
 
         /// <summary>
@@ -338,27 +339,27 @@ namespace Afx.Cache.Impl.Base
         /// <param name="expireIn">缓存有效时间</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Expire(TimeSpan? expireIn, params object[] args)
+        public virtual async Task<bool> Expire(TimeSpan? expireIn, params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
 
-            return database.KeyExpire(key, expireIn);
+            return await database.KeyExpireAsync(key, expireIn);
         }
 
         /// <summary>
         /// ping
         /// </summary>
         /// <returns></returns>
-        public virtual List<TimeSpan> Ping()
+        public virtual async Task<List<TimeSpan>> Ping()
         {
             var eps = this.redis.GetEndPoints();
             List<TimeSpan> list = new List<TimeSpan>(eps.Count());
             foreach(var ep in eps)
             {
                 var server = this.redis.GetServer(ep);
-                var ts = server.Ping();
+                var ts = await server.PingAsync();
                 list.Add(ts);
             }
             return list;

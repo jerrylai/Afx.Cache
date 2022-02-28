@@ -4,6 +4,7 @@ using System.Text;
 using System.Linq;
 using StackExchange.Redis;
 using Afx.Cache.Interfaces;
+using System.Threading.Tasks;
 
 namespace Afx.Cache.Impl.Base
 {
@@ -32,14 +33,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual long PushLeft(T value, params object[] args)
+        public virtual async Task<long> PushLeft(T value, params object[] args)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             string key = this.GetCacheKey(args);
             var v = this.ToBytes(value);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListLeftPush(key, v);
+            var r = await database.ListLeftPushAsync(key, v);
 
             return r;
         }
@@ -49,7 +50,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="list"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual long PushLeft(List<T> list, params object[] args)
+        public virtual async Task<long> PushLeft(List<T> list, params object[] args)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
             foreach(var m in list)
@@ -60,7 +61,7 @@ namespace Afx.Cache.Impl.Base
             var v = list.Select<T, RedisValue>(q => this.ToBytes(q)).ToArray();
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListLeftPush(key, v);
+            var r = await database.ListLeftPushAsync(key, v);
 
             return r;
         }
@@ -70,14 +71,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual long PushRight(T value, params object[] args)
+        public virtual async Task<long> PushRight(T value, params object[] args)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             string key = this.GetCacheKey(args);
             var v = this.ToBytes(value);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListRightPush(key, v);
+            var r = await database.ListRightPushAsync(key, v);
 
             return r;
         }
@@ -87,7 +88,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="list"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual long PushRight(List<T> list, params object[] args)
+        public virtual async Task<long> PushRight(List<T> list, params object[] args)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
             foreach (var m in list)
@@ -98,7 +99,7 @@ namespace Afx.Cache.Impl.Base
             var v = list.Select<T, RedisValue>(q => this.ToBytes(q)).ToArray();
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListRightPush(key, v);
+            var r = await database.ListRightPushAsync(key, v);
 
             return r;
         }
@@ -108,13 +109,13 @@ namespace Afx.Cache.Impl.Base
         /// <param name="index"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual T Get(long index, params object[] args)
+        public virtual async Task<T> Get(long index, params object[] args)
         {
             if (index < 0) throw new ArgumentException(nameof(index));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListGetByIndex(key, index);
+            var r = await database.ListGetByIndexAsync(key, index);
             T m = this.FromBytes<T>(r);
 
             return m;
@@ -126,14 +127,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="stop"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual List<T> GetRange(long start = 0, long stop = -1, params object[] args)
+        public virtual async Task<List<T>> GetRange(long start = 0, long stop = -1, params object[] args)
         {
             if (start < 0) throw new ArgumentException(nameof(start));
             if (stop < -1 || stop != -1 && stop < start) throw new ArgumentException(nameof(stop));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListRange(key, start, stop);
+            var r = await database.ListRangeAsync(key, start, stop);
             var list = r?.Select(q => this.FromBytes<T>(q)).ToList();
 
             return list;
@@ -145,7 +146,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual long InsertAfter(T pivot, T value, params object[] args)
+        public virtual async Task<long> InsertAfter(T pivot, T value, params object[] args)
         {
             if (pivot == null) throw new ArgumentNullException(nameof(pivot));
             if (value == null) throw new ArgumentNullException(nameof(value));
@@ -154,7 +155,7 @@ namespace Afx.Cache.Impl.Base
             var v = this.ToBytes(value);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListInsertAfter(key, p, v);
+            var r = await database.ListInsertAfterAsync(key, p, v);
 
             return r;
         }
@@ -165,7 +166,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual long InsertBefore(T pivot, T value, params object[] args)
+        public virtual async Task<long> InsertBefore(T pivot, T value, params object[] args)
         {
             if (pivot == null) throw new ArgumentNullException(nameof(pivot));
             if (value == null) throw new ArgumentNullException(nameof(value));
@@ -174,7 +175,7 @@ namespace Afx.Cache.Impl.Base
             var v = this.ToBytes(value);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListInsertBefore(key, p, v);
+            var r = await database.ListInsertBeforeAsync(key, p, v);
 
             return r;
         }
@@ -183,12 +184,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual T PopLeft(params object[] args)
+        public virtual async Task<T> PopLeft(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListLeftPop(key);
+            var r = await database.ListLeftPopAsync(key);
             var m = this.FromBytes<T>(r);
 
             return m;
@@ -198,12 +199,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual T PopRight(params object[] args)
+        public virtual async Task<T> PopRight(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListRightPop(key);
+            var r = await database.ListRightPopAsync(key);
             var m = this.FromBytes<T>(r);
 
             return m;
@@ -215,7 +216,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="index">位置</param>
         /// <param name="value">更新后value</param>
         /// <param name="args">缓存key参数</param>
-        public virtual bool Update(long index, T value, params object[] args)
+        public virtual async Task<bool> Update(long index, T value, params object[] args)
         {
             if (index < 0) throw new ArgumentNullException(nameof(index));
             if (value == null) throw new ArgumentNullException(nameof(value));
@@ -223,7 +224,7 @@ namespace Afx.Cache.Impl.Base
             var v = this.ToBytes(value);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            try { database.ListSetByIndex(key, index, v); }
+            try { await database.ListSetByIndexAsync(key, index, v); }
             catch { return false; }
             return true;
         }
@@ -235,7 +236,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="count">匹配数据个数，0.匹配所有</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long Delete(T value, long count = 0, params object[] args)
+        public virtual async Task<long> Delete(T value, long count = 0, params object[] args)
         {
             if (count < 0) throw new ArgumentNullException(nameof(count));
             if (value == null) throw new ArgumentNullException(nameof(value));
@@ -243,7 +244,7 @@ namespace Afx.Cache.Impl.Base
             var v = this.ToBytes(value);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListRemove(key, v, count);
+            var r = await database.ListRemoveAsync(key, v, count);
 
             return r;
         }
@@ -254,26 +255,26 @@ namespace Afx.Cache.Impl.Base
         /// <param name="start">开始位置</param>
         /// <param name="stop">结束位置</param>
         /// <param name="args">缓存key参数</param>
-        public virtual void Trim(long start, long stop, params object[] args)
+        public virtual async Task Trim(long start, long stop, params object[] args)
         {
             if (start < 0) throw new ArgumentException(nameof(start));
             if (stop < start) throw new ArgumentException(nameof(stop));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            database.ListTrim(key, start, stop);
+            await database.ListTrimAsync(key, start, stop);
         }
         /// <summary>
         /// 获取链表长度
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long GetCount(params object[] args)
+        public virtual async Task<long> GetCount(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.ListLength(key);
+            var r = await database.ListLengthAsync(key);
 
             return r;
         }

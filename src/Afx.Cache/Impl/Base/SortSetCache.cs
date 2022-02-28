@@ -5,6 +5,8 @@ using System.Linq;
 using StackExchange.Redis;
 using Afx.Cache.Interfaces;
 using System.Collections;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace Afx.Cache.Impl.Base
 {
@@ -34,14 +36,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="score">排序分</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual double Decrement(T value, double score, params object[] args)
+        public virtual async Task<double> Decrement(T value, double score, params object[] args)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rv = this.ToBytes(value);
-            var r = database.SortedSetDecrement(key, rv, score);
+            var r = await database.SortedSetDecrementAsync(key, rv, score);
 
             return r;
         }
@@ -52,14 +54,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="score">排序分</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual double Increment(T value, double score, params object[] args)
+        public virtual async Task<double> Increment(T value, double score, params object[] args)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rv = this.ToBytes(value);
-            var r = database.SortedSetIncrement(key, rv, score);
+            var r = await database.SortedSetIncrementAsync(key, rv, score);
 
             return r;
         }
@@ -71,12 +73,12 @@ namespace Afx.Cache.Impl.Base
         /// <param name="excType">条件类型</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long GetCount(double minScore = double.NegativeInfinity, double maxScore = double.PositiveInfinity, ExcludeType excType = ExcludeType.None, params object[] args)
+        public virtual async Task<long> GetCount(double minScore = double.NegativeInfinity, double maxScore = double.PositiveInfinity, ExcludeType excType = ExcludeType.None, params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.SortedSetLength(key, minScore, maxScore, (Exclude)(int)excType);
+            var r = await database.SortedSetLengthAsync(key, minScore, maxScore, (Exclude)(int)excType);
 
             return r;
         }
@@ -88,14 +90,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="when">操作类型</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool AddOrUpdate(T value, double score, OpWhen when = OpWhen.Always, params object[] args)
+        public virtual async Task<bool> AddOrUpdate(T value, double score, OpWhen when = OpWhen.Always, params object[] args)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rv = this.ToBytes(value);
-            var r = database.SortedSetAdd(key, rv, score, (When)(int)when);
+            var r = await database.SortedSetAddAsync(key, rv, score, (When)(int)when);
 
             return r;
         }
@@ -106,12 +108,12 @@ namespace Afx.Cache.Impl.Base
         /// <param name="when">操作类型</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool AddOrUpdate(SortSetModel<T> m, OpWhen when = OpWhen.Always, params object[] args)
+        public virtual async Task<bool> AddOrUpdate(SortSetModel<T> m, OpWhen when = OpWhen.Always, params object[] args)
         {
             if (m == null) throw new ArgumentNullException(nameof(m));
             if (m.Value == null) throw new ArgumentNullException(nameof(m.Value));
 
-            return this.AddOrUpdate(m.Value, m.Score, when, args);
+            return await this.AddOrUpdate(m.Value, m.Score, when, args);
         }
         /// <summary>
         /// 添加或更新数据
@@ -120,7 +122,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="when">操作类型</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long AddOrUpdate(List<SortSetModel<T>> list, OpWhen when = OpWhen.Always, params object[] args)
+        public virtual async Task<long> AddOrUpdate(List<SortSetModel<T>> list, OpWhen when = OpWhen.Always, params object[] args)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
             foreach(var kv in list)
@@ -131,7 +133,7 @@ namespace Afx.Cache.Impl.Base
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rv = list.Select(q => new SortedSetEntry(this.ToBytes(q.Value), q.Score)).ToArray();
-            var r = database.SortedSetAdd(key, rv, (When)(int)when);
+            var r = await database.SortedSetAddAsync(key, rv, (When)(int)when);
 
             return r;
         }
@@ -141,12 +143,12 @@ namespace Afx.Cache.Impl.Base
         /// <param name="sort">排序</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual SortSetModel<T> Pop(Sort sort = Sort.Asc, params object[] args)
+        public virtual async Task<SortSetModel<T>> Pop(Sort sort = Sort.Asc, params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var r = database.SortedSetPop(key, (Order)(int)sort);
+            var r = await database.SortedSetPopAsync(key, (Order)(int)sort);
             var m = r.HasValue ? new SortSetModel<T>() { Value = this.FromBytes<T>(r.Value.Element), Score = r.Value.Score } : null;
 
             return m;
@@ -158,13 +160,13 @@ namespace Afx.Cache.Impl.Base
         /// <param name="sort">排序</</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<SortSetModel<T>> Pop(long count, Sort sort = Sort.Asc, params object[] args)
+        public virtual async Task<List<SortSetModel<T>>> Pop(long count, Sort sort = Sort.Asc, params object[] args)
         {
             if (count <= 0) throw new ArgumentException(nameof(count));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SortedSetPop(key, count, (Order)(int)sort);
+            var rs = await database.SortedSetPopAsync(key, count, (Order)(int)sort);
             var list = rs?.Select(q => new SortSetModel<T> { Value = this.FromBytes<T>(q.Element), Score = q.Score }).ToList();
 
             return list;
@@ -177,14 +179,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="sort">排序</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<T> Get(long start = 0, long stop = -1, Sort sort = Sort.Asc, params object[] args)
+        public virtual async Task<List<T>> Get(long start = 0, long stop = -1, Sort sort = Sort.Asc, params object[] args)
         {
             if (start < 0) throw new ArgumentException(nameof(start));
             if (stop < -1 || stop != -1 && stop < start) throw new ArgumentException(nameof(stop));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SortedSetRangeByRank(key, start, stop, (Order)(int)sort);
+            var rs = await database.SortedSetRangeByRankAsync(key, start, stop, (Order)(int)sort);
             var list = rs?.Select(q => this.FromBytes<T>(q)).ToList();
 
             return list;
@@ -197,14 +199,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="sort">排序</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<SortSetModel<T>> GetWithScores(long start = 0, long stop = -1, Sort sort = Sort.Asc, params object[] args)
+        public virtual async Task<List<SortSetModel<T>>> GetWithScores(long start = 0, long stop = -1, Sort sort = Sort.Asc, params object[] args)
         {
             if (start < 0) throw new ArgumentException(nameof(start));
             if (stop < -1 || stop != -1 && stop < start) throw new ArgumentException(nameof(stop));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SortedSetRangeByRankWithScores(key, start, stop, (Order)(int)sort);
+            var rs = await database.SortedSetRangeByRankWithScoresAsync(key, start, stop, (Order)(int)sort);
             var list = rs?.Select(q => new SortSetModel<T> { Value = this.FromBytes<T>(q.Element), Score = q.Score }).ToList();
 
             return list;
@@ -220,7 +222,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="take">返回多少个</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<T> GetByScore(double startScore = double.NegativeInfinity, double stopScore = double.PositiveInfinity,
+        public virtual async Task<List<T>> GetByScore(double startScore = double.NegativeInfinity, double stopScore = double.PositiveInfinity,
             ExcludeType excType = ExcludeType.None, Sort sort = Sort.Asc, long skip = 0, long take = -1, params object[] args)
         {
             if (skip < 0) throw new ArgumentException(nameof(skip));
@@ -228,7 +230,7 @@ namespace Afx.Cache.Impl.Base
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SortedSetRangeByScore(key, startScore, stopScore, (Exclude)(int)excType, (Order)(int)sort, skip, take);
+            var rs = await database.SortedSetRangeByScoreAsync(key, startScore, stopScore, (Exclude)(int)excType, (Order)(int)sort, skip, take);
             var list = rs?.Select(q => this.FromBytes<T>(q)).ToList();
 
             return list;
@@ -244,7 +246,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="take">返回多少个</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual List<SortSetModel<T>> GetByScoreWithScores(double startScore = double.NegativeInfinity,
+        public virtual async Task<List<SortSetModel<T>>> GetByScoreWithScores(double startScore = double.NegativeInfinity,
             double stopScore = double.PositiveInfinity, ExcludeType excType = ExcludeType.None, Sort sort = Sort.Asc,
             long skip = 0, long take = -1, params object[] args)
         {
@@ -253,7 +255,7 @@ namespace Afx.Cache.Impl.Base
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SortedSetRangeByScoreWithScores(key, startScore, stopScore, (Exclude)(int)excType, (Order)(int)sort, skip, take);
+            var rs = await database.SortedSetRangeByScoreWithScoresAsync(key, startScore, stopScore, (Exclude)(int)excType, (Order)(int)sort, skip, take);
             var list = rs?.Select(q => new SortSetModel<T> { Value = this.FromBytes<T>(q.Element), Score = q.Score }).ToList();
 
             return list;
@@ -264,14 +266,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value">value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Delete(T value, params object[] args)
+        public virtual async Task<bool> Delete(T value, params object[] args)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rv = this.ToBytes(value);
-            var r = database.SortedSetRemove(key, rv);
+            var r = await database.SortedSetRemoveAsync(key, rv);
 
             return r;
         }
@@ -281,7 +283,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="list">value List</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long Delete(List<T> list, params object[] args)
+        public virtual async Task<long> Delete(List<T> list, params object[] args)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
             foreach (var m in list)
@@ -292,7 +294,7 @@ namespace Afx.Cache.Impl.Base
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
             var rv = list.Select<T, RedisValue>(q => this.ToBytes(q)).ToArray();
-            var r = database.SortedSetRemove(key, rv);
+            var r = await database.SortedSetRemoveAsync(key, rv);
 
             return r;
         }
@@ -303,14 +305,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="stop">结束位置</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long Delete(long start, long stop, params object[] args)
+        public virtual async Task<long> Delete(long start, long stop, params object[] args)
         {
             if (start < 0) throw new ArgumentException(nameof(start));
             if (stop < start) throw new ArgumentException(nameof(stop));
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SortedSetRemoveRangeByRank(key, start, stop);
+            var rs = await database.SortedSetRemoveRangeByRankAsync(key, start, stop);
 
             return rs;
         }
@@ -322,12 +324,12 @@ namespace Afx.Cache.Impl.Base
         /// <param name="excType">条件类型</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual long DeleteByScore(double startScore, double stopScore, ExcludeType excType = ExcludeType.None, params object[] args)
+        public virtual async Task<long> DeleteByScore(double startScore, double stopScore, ExcludeType excType = ExcludeType.None, params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var rs = database.SortedSetRemoveRangeByScore(key, startScore, stopScore, (Exclude)(int)excType);
+            var rs = await database.SortedSetRemoveRangeByScoreAsync(key, startScore, stopScore, (Exclude)(int)excType);
 
             return rs;
         }
@@ -340,22 +342,22 @@ namespace Afx.Cache.Impl.Base
         /// <param name="pageSize">游标页大小</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual IEnumerable<T> Scan(string pattern, int start, int pageSize, params object[] args)
+        public virtual IAsyncEnumerable<T> Scan(string pattern, int start, int pageSize, params object[] args)
         {
             string cachekey = this.GetCacheKey(args);
             int db = this.GetCacheDb(cachekey);
             var database = this.redis.GetDatabase(db);
-            var el = database.SetScan(cachekey, this.ToBytes(pattern), pageSize, 0, start);
+            var el = database.SetScanAsync(cachekey, this.ToBytes(pattern), pageSize, 0, start);
 
-            return new Enumerable(this, el);
+            return new AsyncEnumerable(this, el);
         }
 
-        class Enumerator : IEnumerator<T>
+        class AsyncEnumerator : IAsyncEnumerator<T>
         {
             private SortSetCache<T> setCache;
-            private IEnumerator<RedisValue> enumerator;
+            private IAsyncEnumerator<RedisValue> enumerator;
 
-            public Enumerator(SortSetCache<T> setCache, IEnumerator<RedisValue> enumerator)
+            public AsyncEnumerator(SortSetCache<T> setCache, IAsyncEnumerator<RedisValue> enumerator)
             {
                 this.setCache = setCache;
                 this.enumerator = enumerator;
@@ -363,45 +365,33 @@ namespace Afx.Cache.Impl.Base
 
             public T Current => this.setCache.FromBytes<T>(enumerator.Current);
 
-            object IEnumerator.Current => this.Current;
-
-            public void Dispose()
+            public virtual async ValueTask DisposeAsync()
             {
-                if (this.enumerator != null) this.enumerator.Dispose();
+                if (this.enumerator != null) await this.enumerator.DisposeAsync();
                 this.setCache = null;
                 this.enumerator = null;
             }
 
-            public bool MoveNext()
+            public virtual async ValueTask<bool> MoveNextAsync()
             {
-                return this.enumerator.MoveNext();
-            }
-
-            public void Reset()
-            {
-                this.enumerator.Reset();
+                return await this.enumerator.MoveNextAsync();
             }
         }
 
-        class Enumerable : IEnumerable<T>
+        class AsyncEnumerable : IAsyncEnumerable<T>
         {
             private SortSetCache<T> setCache;
-            private IEnumerable<RedisValue> values;
+            private IAsyncEnumerable<RedisValue> values;
 
-            public Enumerable(SortSetCache<T> setCache, IEnumerable<RedisValue> values)
+            public AsyncEnumerable(SortSetCache<T> setCache, IAsyncEnumerable<RedisValue> values)
             {
                 this.setCache = setCache;
                 this.values = values;
             }
 
-            public IEnumerator<T> GetEnumerator()
+            public virtual IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default)
             {
-                return new Enumerator(this.setCache, this.values.GetEnumerator());
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
+                return new AsyncEnumerator(this.setCache, this.values.GetAsyncEnumerator(cancellationToken));
             }
         }
     }

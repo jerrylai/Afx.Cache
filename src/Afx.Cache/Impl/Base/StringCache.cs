@@ -5,6 +5,7 @@ using System.Text;
 
 using StackExchange.Redis;
 using Afx.Cache.Interfaces;
+using System.Threading.Tasks;
 
 namespace Afx.Cache.Impl.Base
 {
@@ -32,12 +33,12 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual T Get(params object[] args)
+        public virtual async Task<T> Get(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var value = database.StringGet(key);
+            var value = await database.StringGetAsync(key);
             T m = this.FromBytes<T>(value);
 
             return m;
@@ -49,9 +50,9 @@ namespace Afx.Cache.Impl.Base
         /// <param name="when"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual bool Set(T m, OpWhen when = OpWhen.Always, params object[] args)
+        public virtual async Task<bool> Set(T m, OpWhen when = OpWhen.Always, params object[] args)
         {
-            return this.Set(m, this.KeyConfig.Expire, when, args);
+            return await this.Set(m, this.KeyConfig.Expire, when, args);
         }
         /// <summary>
         /// 添加或更新
@@ -61,14 +62,14 @@ namespace Afx.Cache.Impl.Base
         /// <param name="when"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual bool Set(T m, TimeSpan? expireIn, OpWhen when = OpWhen.Always, params object[] args)
+        public virtual async Task<bool> Set(T m, TimeSpan? expireIn, OpWhen when = OpWhen.Always, params object[] args)
         {
             bool result = false;
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            if (m == null) result = database.KeyDelete(key);
-            else result = database.StringSet(key, this.ToBytes(m), expireIn, (When)(int)when);
+            if (m == null) result = await database.KeyDeleteAsync(key);
+            else result = await database.StringSetAsync(key, this.ToBytes(m), expireIn, (When)(int)when);
 
             return result;
         }
@@ -78,7 +79,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual long Increment(long value = 1, params object[] args)
+        public virtual async Task<long> Increment(long value = 1, params object[] args)
         {
             var t = typeof(T);
             if(!(t == typeof(int) || t == typeof(long) || t == typeof(uint) || t == typeof(ulong)))
@@ -88,7 +89,7 @@ namespace Afx.Cache.Impl.Base
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var v = database.StringIncrement(key, value);
+            var v = await database.StringIncrementAsync(key, value);
 
             return v;
         }
@@ -98,7 +99,7 @@ namespace Afx.Cache.Impl.Base
         /// <param name="value"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public virtual long Decrement(long value = 1, params object[] args)
+        public virtual async Task<long> Decrement(long value = 1, params object[] args)
         {
             var t = typeof(T);
             if (!(t == typeof(int) || t == typeof(long) || t == typeof(uint) || t == typeof(ulong)))
@@ -108,7 +109,7 @@ namespace Afx.Cache.Impl.Base
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
             var database = this.redis.GetDatabase(db);
-            var v = database.StringDecrement(key, value);
+            var v = await database.StringDecrementAsync(key, value);
 
             return v;
         }

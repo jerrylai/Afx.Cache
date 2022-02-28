@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 #if NETCOREAPP || NETSTANDARD
 using System.Text.Json;
 #else
@@ -42,14 +43,14 @@ namespace Afx.Cache.Interfaces
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        bool Contains(params object[] args);
+        Task<bool> Contains(params object[] args);
 
         /// <summary>
         /// 移除缓存
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        bool Remove(params object[] args);
+        Task<bool> Remove(params object[] args);
 
         /// <summary>
         /// 设置缓存有效时间
@@ -57,18 +58,18 @@ namespace Afx.Cache.Interfaces
         /// <param name="expireIn">缓存有效时间</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        bool Expire(TimeSpan? expireIn, params object[] args);
+        Task<bool> Expire(TimeSpan? expireIn, params object[] args);
 
         /// <summary>
         /// 根据系统配置设置缓存有效时间
         /// </summary>
         /// <param name="args"></param>
         /// <returns>缓存key参数</returns>
-        bool Expire(params object[] args);
+        Task<bool> Expire(params object[] args);
         /// <summary>
         /// ping
         /// </summary>
         /// <returns></returns>
-        List<TimeSpan> Ping();
+        Task<List<TimeSpan>> Ping();
     }
 }
