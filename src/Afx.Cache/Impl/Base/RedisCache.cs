@@ -296,7 +296,21 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual async Task<bool> Remove(params object[] args)
+        public virtual bool Remove(params object[] args)
+        {
+            string key = this.GetCacheKey(args);
+            int db = this.GetCacheDb(key);
+            var database = this.redis.GetDatabase(db);
+
+            return database.KeyDelete(key);
+        }
+
+        /// <summary>
+        /// 移除缓存
+        /// </summary>
+        /// <param name="args">缓存key参数</param>
+        /// <returns></returns>
+        public virtual async Task<bool> RemoveAsync(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
