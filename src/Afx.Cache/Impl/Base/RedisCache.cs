@@ -296,7 +296,7 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual bool Remove(params object[] args)
+        public virtual bool SyncRemove(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);
@@ -310,7 +310,7 @@ namespace Afx.Cache.Impl.Base
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        public virtual async Task<bool> RemoveAsync(params object[] args)
+        public virtual async Task<bool> Remove(params object[] args)
         {
             string key = this.GetCacheKey(args);
             int db = this.GetCacheDb(key);

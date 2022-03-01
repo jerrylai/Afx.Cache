@@ -50,13 +50,13 @@ namespace Afx.Cache.Interfaces
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        bool Remove(params object[] args);
+        bool SyncRemove(params object[] args);
         /// <summary>
         /// 移除缓存
         /// </summary>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
-        Task<bool> RemoveAsync(params object[] args);
+        Task<bool> Remove(params object[] args);
 
         /// <summary>
         /// 设置缓存有效时间
