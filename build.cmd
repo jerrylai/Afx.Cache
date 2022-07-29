@@ -1,8 +1,6 @@
 @echo off
-set Build="%SYSTEMDRIVE%\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MsBuild.exe"
+set Build="%SYSTEMDRIVE%\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Bin\MsBuild.exe"
 if exist publish rd /s /q publish
-%Build% "NET461/Afx.Cache/Afx.Cache.csproj" /t:Rebuild /p:Configuration=Release
-%Build% "NET472/Afx.Cache/Afx.Cache.csproj" /t:Rebuild /p:Configuration=Release
 dotnet build "NETStandard2.0/Afx.Cache/Afx.Cache.csproj" -c Release 
 cd publish
 del /q/s *.pdb

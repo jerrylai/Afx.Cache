@@ -25,7 +25,8 @@ namespace Afx.Cache.Impl.Base
 #if NETCOREAPP || NETSTANDARD
         private static readonly JsonSerializerOptions defaultOptions = new JsonSerializerOptions()
         {
-            IgnoreNullValues = true,
+          // IgnoreNullValues = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             WriteIndented = false,
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             PropertyNameCaseInsensitive = false,
