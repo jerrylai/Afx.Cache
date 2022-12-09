@@ -74,7 +74,7 @@ namespace Afx.Cache.Interfaces
         /// 返回并集合
         /// </summary>
         /// <param name="count">返回数量</param>
-        /// <param name="sort">排序</</param>
+        /// <param name="sort">排序</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         Task<List<SortSetModel<T>>> Pop(long count, Sort sort = Sort.Asc, params object[] args);

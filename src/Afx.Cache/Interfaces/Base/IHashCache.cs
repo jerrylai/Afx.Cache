@@ -68,7 +68,7 @@ namespace Afx.Cache.Interfaces
         /// <summary>
         /// 是否存在hash key
         /// </summary>
-        /// <param name="key">hash key</param>
+        /// <param name="field">hash key</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         Task<bool> Exists(TField field, params object[] args);

@@ -116,7 +116,7 @@ namespace Afx.Cache.Interfaces
         /// <param name="pattern">搜索表达式</param>
         /// <param name="start">开始位置</param>
         /// <param name="pageSize">游标页大小</param>
-        /// <param name="args"><缓存key参数/param>
+        /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         IAsyncEnumerable<T> Scan(string pattern, int start, int pageSize, params object[] args);
     }

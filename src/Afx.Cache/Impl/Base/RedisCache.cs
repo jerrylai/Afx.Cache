@@ -7,13 +7,6 @@ using StackExchange.Redis;
 using Afx.Cache.Interfaces;
 using System.Threading.Tasks;
 
-#if NETCOREAPP || NETSTANDARD
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-#else
-using Newtonsoft.Json;
-#endif
 
 namespace Afx.Cache.Impl.Base
 {
@@ -22,43 +15,12 @@ namespace Afx.Cache.Impl.Base
     /// </summary>
     public abstract class RedisCache : BaseCache, IRedisCache
     {
-#if NETCOREAPP || NETSTANDARD
-        private static readonly JsonSerializerOptions defaultOptions = new JsonSerializerOptions()
-        {
-          // IgnoreNullValues = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-            WriteIndented = false,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-            PropertyNameCaseInsensitive = false,
-            PropertyNamingPolicy = null,
-            DictionaryKeyPolicy = null
-        };
+        /// <summary>
+        /// 默认json序列化
+        /// </summary>
+        public static IJsonSerialize DefaultSerialize;
+        private IJsonSerialize options;
 
-        public const string DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-        static RedisCache()
-        {
-            //  options.Converters.Add(new DateTimeJsonConverter(DATE_FORMAT));
-            defaultOptions.Converters.Add(new StringJsonConverter());
-            defaultOptions.Converters.Add(new BoolJsonConverter());
-            defaultOptions.Converters.Add(new IntJsonConverter());
-            defaultOptions.Converters.Add(new LongJsonConverter());
-            defaultOptions.Converters.Add(new FloatJsonConverter());
-            defaultOptions.Converters.Add(new DoubleJsonConverter());
-            defaultOptions.Converters.Add(new DecimalJsonConverter());
-        }
-#else
-        private static readonly JsonSerializerSettings defaultOptions = new JsonSerializerSettings()
-        {
-            NullValueHandling = NullValueHandling.Ignore,
-            MissingMemberHandling = Newtonsoft.Json.MissingMemberHandling.Ignore
-        };
-#endif
-
-#if NETCOREAPP || NETSTANDARD
-        private JsonSerializerOptions options = defaultOptions;
-#else
-        private JsonSerializerSettings options = defaultOptions;
-#endif
         /// <summary>
         /// ICacheKey
         /// </summary>
@@ -94,27 +56,17 @@ namespace Afx.Cache.Impl.Base
         /// <param name="prefix">缓存前缀</param>
         public RedisCache(string node, string item, IConnectionMultiplexer redis, ICacheKey cacheKey, string prefix)
         {
-            if (string.IsNullOrEmpty(node))
-            {
-                throw new ArgumentNullException("node");
-            }
-            if (string.IsNullOrEmpty(item))
-            {
-                throw new ArgumentNullException("item");
-            }
-            if (redis == null)
-            {
-                throw new ArgumentNullException("redis");
-            }
-            if (cacheKey == null)
-            {
-                throw new ArgumentNullException("cacheKey");
-            }
+            if (string.IsNullOrEmpty(node)) throw new ArgumentNullException("node");
+            if (string.IsNullOrEmpty(item))throw new ArgumentNullException("item");
+            if (redis == null)throw new ArgumentNullException("redis");
+            if (cacheKey == null)throw new ArgumentNullException("cacheKey");
+            if (DefaultSerialize == null) throw new ArgumentNullException("RedisCache.DefaultSerialize");
             this.KeyConfig = cacheKey.Get(node, item);
             if(this.KeyConfig == null) throw new ArgumentException($"{node}/{item} 未配置！");
             this.redis = redis;
             this.cacheKey = cacheKey;
             this.Prefix = prefix ?? string.Empty;
+            this.options = DefaultSerialize;
             
             StringBuilder stringBuilder = new StringBuilder();
             foreach(var c in this.KeyConfig.Node)
@@ -132,59 +84,13 @@ namespace Afx.Cache.Impl.Base
             stringBuilder.Append(":");
             this.NodeName = stringBuilder.ToString();
         }
-
-#if NETCOREAPP || NETSTANDARD
-        public virtual void SetJsonOptions(JsonSerializerOptions options)
-        {
-            if (options == null) return;
-            this.options = options;
-        }
-#else
-        public virtual void SetJsonOptions(JsonSerializerSettings options)
-        {
-            if (options == null) return;
-            this.options = options;
-        }
-#endif
         /// <summary>
-        /// 序列化json
+        /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        protected virtual string Serialize<T>(T value)
+        /// <param name="jsonSerialize"></param>
+        public virtual void SetJsonSerialize(IJsonSerialize jsonSerialize)
         {
-            if (value == null) return null;
-#if NETCOREAPP || NETSTANDARD
-            if (value is JsonElement)
-            {
-                object o = value;
-                var el = (JsonElement)o;
-                return el.GetRawText();
-            }
-
-            return JsonSerializer.Serialize(value, defaultOptions);
-#else
-            return JsonConvert.SerializeObject(value, options);
-#endif
-        }
-
-        /// <summary>
-        /// 反序列化
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="json"></param>
-        /// <returns></returns>
-        protected virtual T Deserialize<T>(string json)
-        {
-            T m = default(T);
-            if (string.IsNullOrEmpty(json)) return m;
-#if NETCOREAPP || NETSTANDARD
-            m = JsonSerializer.Deserialize<T>(json, defaultOptions);
-#else
-            m =  JsonConvert.DeserializeObject<T>(json, options);
-#endif
-            return m;
+            this.options = jsonSerialize ?? DefaultSerialize;
         }
 
         /// <summary>
@@ -209,7 +115,7 @@ namespace Afx.Cache.Impl.Base
                 }
                 else
                 {
-                    string json = this.Serialize(value);
+                    string json = this.options.Serialize(value);
                     buffer = Encoding.UTF8.GetBytes(json);
                 }
             }
@@ -240,7 +146,7 @@ namespace Afx.Cache.Impl.Base
                     }
                     else if (!string.IsNullOrEmpty(s))
                     {
-                        m = this.Deserialize<T>(s);
+                        m = this.options.Deserialize<T>(s);
                     }
                 }
             }
@@ -393,329 +299,10 @@ namespace Afx.Cache.Impl.Base
                 this.redis = null;
                 this.cacheKey = null;
                 this.Prefix = null;
+                this.options = null;
             }
             base.Dispose(disposing);
         }
 
     }
-
-#if NETCOREAPP || NETSTANDARD
-    /// <summary>
-    /// 日期格式
-    /// </summary>
-    internal class DateTimeJsonConverter : JsonConverter<DateTime>
-    {
-        /// <summary>
-        /// 格式
-        /// </summary>
-        public string Format { get; }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="format"></param>
-        public DateTimeJsonConverter(string format)
-        {
-            this.Format = format;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            var t = DateTime.Parse(reader.GetString());
-            if (t.Kind == DateTimeKind.Unspecified)
-            {
-                t = new DateTime(t.Ticks, DateTimeKind.Local);
-            }
-
-            return t;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value"></param>
-        /// <param name="options"></param>
-        public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value.ToString(this.Format));
-        }
-    }
-    /// <summary>
-    /// 字符串
-    /// </summary>
-    internal class StringJsonConverter : JsonConverter<string>
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <param name="typeToConvert"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            string v = null;
-            switch (reader.TokenType)
-            {
-                case JsonTokenType.String:
-                    v = reader.GetString();
-                    break;
-                case JsonTokenType.Number:
-                    if (reader.TryGetInt32(out var num))
-                        v = num.ToString();
-                    else if (reader.TryGetDecimal(out var dm))
-                        v = dm.ToString();
-                    break;
-                case JsonTokenType.True:
-                case JsonTokenType.False:
-                    v = reader.GetBoolean().ToString().ToLower();
-                    break;
-                case JsonTokenType.Null:
-                    break;
-                default:
-                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
-            }
-
-            return v;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="value"></param>
-        /// <param name="options"></param>
-        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(value);
-        }
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class BoolJsonConverter : JsonConverter<bool>
-    {
-
-        public override bool Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            bool v = false;
-            switch (reader.TokenType)
-            {
-                case JsonTokenType.String:
-                    var s = reader.GetString()?.ToLower();
-                    if (int.TryParse(s, out var k)) v = k != 0;
-                    else v = (s == "true" || s == "on");
-                    break;
-                case JsonTokenType.Number:
-                    if (reader.TryGetInt32(out var j)) v = j != 0;
-                    break;
-                case JsonTokenType.True:
-                    v = true;
-                    break;
-                case JsonTokenType.False:
-                    v = false;
-                    break;
-                case JsonTokenType.Null:
-                    break;
-                default:
-                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
-            }
-
-            return v;
-        }
-
-        public override void Write(Utf8JsonWriter writer, bool value, JsonSerializerOptions options)
-        {
-            writer.WriteBooleanValue(value);
-        }
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class IntJsonConverter : JsonConverter<int>
-    {
-
-        public override int Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            int v = 0;
-            switch (reader.TokenType)
-            {
-                case JsonTokenType.String:
-                    int.TryParse(reader.GetString(), out v);
-                    break;
-                case JsonTokenType.Number:
-                    reader.TryGetInt32(out v);
-                    break;
-                case JsonTokenType.True:
-                    v = 1;
-                    break;
-                case JsonTokenType.False:
-                    v = 0;
-                    break;
-                case JsonTokenType.Null:
-                    break;
-                default:
-                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
-            }
-
-            return v;
-        }
-
-        public override void Write(Utf8JsonWriter writer, int value, JsonSerializerOptions options)
-        {
-            writer.WriteNumberValue(value);
-        }
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class LongJsonConverter : JsonConverter<long>
-    {
-
-        public override long Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            long v = 0;
-            switch (reader.TokenType)
-            {
-                case JsonTokenType.String:
-                    long.TryParse(reader.GetString(), out v);
-                    break;
-                case JsonTokenType.Number:
-                    reader.TryGetInt64(out v);
-                    break;
-                case JsonTokenType.True:
-                    v = 1;
-                    break;
-                case JsonTokenType.False:
-                    v = 0;
-                    break;
-                case JsonTokenType.Null:
-                    break;
-                default:
-                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
-            }
-
-            return v;
-        }
-
-        public override void Write(Utf8JsonWriter writer, long value, JsonSerializerOptions options)
-        {
-            writer.WriteNumberValue(value);
-        }
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class FloatJsonConverter : JsonConverter<float>
-    {
-        public override float Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            float v = 0;
-            switch (reader.TokenType)
-            {
-                case JsonTokenType.String:
-                    float.TryParse(reader.GetString(), out v);
-                    break;
-                case JsonTokenType.Number:
-                    reader.TryGetSingle(out v);
-                    break;
-                case JsonTokenType.True:
-                    v = 1;
-                    break;
-                case JsonTokenType.False:
-                    v = 0;
-                    break;
-                case JsonTokenType.Null:
-                    break;
-                default:
-                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
-            }
-
-            return v;
-        }
-
-        public override void Write(Utf8JsonWriter writer, float value, JsonSerializerOptions options)
-        {
-            writer.WriteNumberValue(value);
-        }
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class DoubleJsonConverter : JsonConverter<double>
-    {
-
-        public override double Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            double v = 0;
-            switch (reader.TokenType)
-            {
-                case JsonTokenType.String:
-                    double.TryParse(reader.GetString(), out v);
-                    break;
-                case JsonTokenType.Number:
-                    reader.TryGetDouble(out v);
-                    break;
-                case JsonTokenType.True:
-                    v = 1;
-                    break;
-                case JsonTokenType.False:
-                    v = 0;
-                    break;
-                case JsonTokenType.Null:
-                    break;
-                default:
-                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
-            }
-
-            return v;
-        }
-
-        public override void Write(Utf8JsonWriter writer, double value, JsonSerializerOptions options)
-        {
-            writer.WriteNumberValue(value);
-        }
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class DecimalJsonConverter : JsonConverter<decimal>
-    {
-
-        public override decimal Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            decimal v = 0;
-            switch (reader.TokenType)
-            {
-                case JsonTokenType.String:
-                    decimal.TryParse(reader.GetString(), out v);
-                    break;
-                case JsonTokenType.Number:
-                    reader.TryGetDecimal(out v);
-                    break;
-                case JsonTokenType.True:
-                    v = 1;
-                    break;
-                case JsonTokenType.False:
-                    v = 0;
-                    break;
-                case JsonTokenType.Null:
-                    break;
-                default:
-                    throw new InvalidOperationException($"{reader.TokenType} not convert to {typeToConvert.FullName}.");
-            }
-
-            return v;
-        }
-
-        public override void Write(Utf8JsonWriter writer, decimal value, JsonSerializerOptions options)
-        {
-            writer.WriteNumberValue(value);
-        }
-    }
-#endif
 }

@@ -2,11 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-#if NETCOREAPP || NETSTANDARD
-using System.Text.Json;
-#else
-using Newtonsoft.Json;
-#endif
 
 namespace Afx.Cache.Interfaces
 {
@@ -19,11 +14,11 @@ namespace Afx.Cache.Interfaces
         /// 缓存key配置
         /// </summary>
         CacheKeyConfig KeyConfig { get; }
-#if NETCOREAPP || NETSTANDARD
-        void SetJsonOptions(JsonSerializerOptions options);
-#else
-        void SetJsonOptions(JsonSerializerSettings options);
-#endif
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="jsonSerialize"></param>
+        void SetJsonSerialize(IJsonSerialize jsonSerialize);
         /// <summary>
         /// 获取完整缓存key
         /// </summary>

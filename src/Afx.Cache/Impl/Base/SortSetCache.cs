@@ -118,7 +118,7 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 添加或更新数据
         /// </summary>
-        /// <param name="m">SortSetModel</param>
+        /// <param name="list">SortSetModel</param>
         /// <param name="when">操作类型</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
@@ -157,7 +157,7 @@ namespace Afx.Cache.Impl.Base
         /// 返回并集合
         /// </summary>
         /// <param name="count">返回数量</param>
-        /// <param name="sort">排序</</param>
+        /// <param name="sort">排序</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         public virtual async Task<List<SortSetModel<T>>> Pop(long count, Sort sort = Sort.Asc, params object[] args)

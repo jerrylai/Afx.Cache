@@ -66,7 +66,7 @@ namespace Afx.Cache.Interfaces
         /// 插入到那个value前面
         /// </summary>
         /// <param name="pivot">要插入到那个value前面</param>
-        /// <param name="value">插入value<</param>
+        /// <param name="value">插入value</param>
         /// <param name="args">缓存key参数</param>
         /// <returns></returns>
         Task<long> InsertBefore(T pivot, T value, params object[] args);
