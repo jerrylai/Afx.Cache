@@ -18,7 +18,7 @@ namespace Afx.Cache.Impl.Base
         /// <summary>
         /// 默认json序列化
         /// </summary>
-        public static IJsonSerialize DefaultSerialize;
+        public readonly static IJsonSerialize DefaultSerialize = new RedisJson();
         private IJsonSerialize options;
 
         /// <summary>
@@ -60,7 +60,6 @@ namespace Afx.Cache.Impl.Base
             if (string.IsNullOrEmpty(item))throw new ArgumentNullException("item");
             if (redis == null)throw new ArgumentNullException("redis");
             if (cacheKey == null)throw new ArgumentNullException("cacheKey");
-            if (DefaultSerialize == null) throw new ArgumentNullException("RedisCache.DefaultSerialize");
             this.KeyConfig = cacheKey.Get(node, item);
             if(this.KeyConfig == null) throw new ArgumentException($"{node}/{item} 未配置！");
             this.redis = redis;
