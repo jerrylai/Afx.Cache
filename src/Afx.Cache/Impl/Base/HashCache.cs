@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 using StackExchange.Redis;
 using Afx.Cache.Interfaces;
-using System.Collections;
 using System.Threading.Tasks;
 using System.Threading;
 
